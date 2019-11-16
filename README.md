@@ -4,3 +4,33 @@ Graphical Arch Linux installer
 # Screenshot
 
 ![screenshot](screenshot.png)
+
+# Pre-built Live ISO:
+
+A pre-built ISO from the steps below, can be found [here](https://hvornum.se/archiso/)
+
+# Install on Arch ISO
+
+Follow the basics steps for **releng** on [Archiso wiki](https://wiki.archlinux.org/index.php/Archiso). Then, before you build, do the following steps:
+
+```
+# cd ~/archiso_build_folder
+# echo -e "git\npython\npython-psutil" >> packages.x86_64
+# cat <<EOF >> ./airootfs/root/customize_airootfs.sh
+cd /root
+git clone --recursive https://github.com/Torxed/archinstall_gui.git
+cp archinstall_gui/INSTALL/archinstall_gui.service /etc/systemd/system/
+cp archinstall_gui/INSTALL/xinitrc /etc/X11/xinit/
+cp -r archinstall_gui /srv/
+chmod +x /srv/archinstall_gui/webgui.py
+systemctl daemon-reload
+systemctl enable archinstall_gui.service
+EOF
+# mkdir ./airootfs/etc/skel
+# echo '[[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && sh -c "startx"' >> ./airootfs/etc/skel/.zprofile
+```
+
+This will auto-run the backend webservice that does all the actual work.<br>
+Then, on boot it will launch `X` with `chromium` in full-screen mode *(thanks to the `xinitrc` from the `INSTALL` folder of this repo)*.
+
+Now, do `sudo ./build.sh -v` and boot your live-cd.
