@@ -15,7 +15,16 @@ Follow the basics steps for **releng** on [Archiso wiki](https://wiki.archlinux.
 
 ```
 # cd ~/archiso_build_folder
-# echo -e "git\npython\npython-psutil" >> packages.x86_64
+# cat <<EOF >> ./packages.x86_64
+python
+python-systemd
+python-psutil
+git
+xorg-server
+xorg-xinit
+xorg-twm
+chromium
+EOF
 # cat <<EOF >> ./airootfs/root/customize_airootfs.sh
 cd /root
 git clone --recursive https://github.com/Torxed/archinstall_gui.git
@@ -33,4 +42,4 @@ EOF
 This will auto-run the backend webservice that does all the actual work.<br>
 Then, on boot it will launch `X` with `chromium` in full-screen mode *(thanks to the `xinitrc` from the `INSTALL` folder of this repo)*.
 
-Now, do `sudo ./build.sh -v` and boot your live-cd.
+Now, do `sudo ./build.sh -v` and a finished ISO should pop out under `./out`.
