@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import signal, time, json
 import shlex, pty, os
 import sys, traceback

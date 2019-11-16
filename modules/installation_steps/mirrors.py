@@ -1,5 +1,7 @@
 import json
+import urllib.request
 from os.path import isdir, isfile
+from time import time
 
 html = """
 <div class="padded_content flex_grow flex column">
@@ -9,13 +11,16 @@ html = """
 		<div class="input-form" id="input-form">
 			<input type="password" id="country_code" required autocomplete="off" />
 			<label class="label">
-				<span class="label-content">Enter a country code</span>
+				<span class="label-content">Filter by country code <i>(Ex: Sweden = SE)</i></span>
 			</label>
 		</div>
 	</div>
+	<select id="mirrorlist" multiple>
+
+	</select>
 
 	<div class="buttons bottom">
-		<button id="save_mirrors">Start formatting</button>
+		<button id="save_mirrors">Save mirrorlist<i>(s)</i></button>
 	</div>
 </div>
 """
@@ -33,14 +38,37 @@ document.querySelector('#save_mirrors').addEventListener('click', function() {
 	})
 })
 
-window.update_mirrorlist = (errors, data) => {
-	console.log('Got mirrors!', errors)
+window.refresh_mirrorlist = () => {
+	let mirrorlist_dropdown = document.querySelector('#mirrorlist');
+
+	window.mirror_list['urls'].forEach((mirrorlist_info) => {
+		if(!mirrorlist_info['active'])
+			return
+		if(mirrorlist_info['protocol'] !== 'https')
+			return
+
+		let option = document.createElement('option');
+		option.value = mirrorlist_info['url'];
+		option.innerHTML = mirrorlist_info['country'] + ' (' + mirrorlist_info['url'] + ')';
+
+		mirrorlist_dropdown.appendChild(option);
+	})
 }
 
-fetch(`https://www.archlinux.org/mirrors/status/json/`)
-       .then(response => response.json())
-       .then(json => callback(null, json.restaurants))
-       .catch(error => callback(error, null))
+window.update_mirrorlist = (data) => {
+	window.mirror_list = data['mirrorlist'];
+	window.refresh_mirrorlist();
+}
+
+/* Sweden */
+//Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch
+
+if(typeof resource_handlers['mirrors'] === 'undefined')
+	resource_handlers['mirrors'] = [update_mirrorlist];
+else if(resource_handlers['mirrors'].length == 1)
+	resource_handlers['mirrors'].push(update_mirrorlist)
+
+socket.send({'_install_step' : 'mirrors', 'mirrors' : 'refresh'})
 
 """
 
@@ -64,7 +92,21 @@ class parser():
 					}
 				}
 			else:
-				yield {
-					'status' : 'success',
-					'next' : 'language'
-				}
+				if data['mirrors'] == 'refresh':
+					## https://www.archlinux.org/mirrors/status/json/
+					## https://www.archlinux.org/mirrorlist/?country=SE&protocol=https&use_mirror_status=on
+					if not 'mirrors' in storage or time() - storage['mirrors']['last_check'] > storage['mirrors']['check_frequency']:
+						with urllib.request.urlopen('https://www.archlinux.org/mirrors/status/json/') as url:
+							json_data = json.loads(url.read().decode())
+							storage['mirrors'] = json_data
+							storage['mirrors']['last_check'] = time() # Replace STRFTIME format with unix timestamp.
+
+					yield {
+						'status' : 'success',
+						'mirrorlist' : storage['mirrors']
+					}
+				else:
+					yield {
+						'status' : 'success',
+						'next' : 'language'
+					}

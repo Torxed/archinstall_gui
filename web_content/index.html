@@ -7,11 +7,13 @@
 		<script type="text/javascript">
 			let socket = null; // Create a global socket element, initate it with `new slimWebSocket();` later
 			let backend = 'wss://127.0.0.1';
+			var xhr = null;
 
 			// Configuration, once set, certain fields will be blocked.
 			let drives = {};
 			let selected_drive = null;
 			let disk_password = null;
+			let mirror_list = {};
 
 			// Loading JavaScript from a cross-site resource is blocked.
 			// But there's nothing stopping us from downloading the script
@@ -22,7 +24,7 @@
 			var script = document.createElement('script');
 			script.type = 'text/javascript';
 
-			let xhr = new XMLHttpRequest();
+			xhr = new XMLHttpRequest();
 			xhr.open("GET", 'https://raw.githubusercontent.com/Torxed/slimWebSocket/master/slimWebSocket.js', true);
 			xhr.onreadystatechange = function() {
 				if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
@@ -145,7 +147,12 @@
 
 			function data_router(data) {
 				if(typeof resource_handlers[data['_modules']] !== 'undefined') {
-					resource_handlers[data['_modules']](data);
+					if(typeof resource_handlers[data['_modules']] === 'object')
+						resource_handlers[data['_modules']].forEach((handler) => {
+							handler(data);
+						})
+					else
+						resource_handlers[data['_modules']](data);
 				} else {
 					console.log('Got unhandled data:', data)
 				}
@@ -156,7 +163,8 @@
 				resource_handlers['listModules'] = listModules
 				resource_handlers['credentials'] = listCredentials
 				resource_handlers['hardware'] = listHardware
-				resource_handlers['mirrors'] = listMirrors
+				resource_handlers['mirrors'] = [];
+				resource_handlers['mirrors'].push(listMirrors);
 
 				socket.socket.addEventListener('message', function (event) {
 					let data = event.data;
