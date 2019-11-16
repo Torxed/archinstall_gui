@@ -34,4 +34,4 @@ fi
 
 ## Chromium refuses to start as root, and since the installer runs under root
 ## we'll have to disable the sandbox.
-chromium --no-sandbox --start-fullscreen http://127.0.0.1
+chromium --no-sandbox --start-fullscreen --disable-infobars http://127.0.0.1

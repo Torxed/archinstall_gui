@@ -11,7 +11,7 @@ html = """
 		<div class="input-form" id="input-form">
 			<input type="password" id="country_code" required autocomplete="off" />
 			<label class="label">
-				<span class="label-content">Filter by country code <i>(Ex: Sweden = SE)</i></span>
+				<span class="label-content">Filter by country code <i>(Ex: SE = Sweden)</i></span>
 			</label>
 		</div>
 	</div>
@@ -33,7 +33,8 @@ document.querySelector('#save_mirrors').addEventListener('click', function() {
 	socket.send({
 		'_install_step' : 'mirrors',
 		'mirrors' : {
-			'region' : null
+			'region' : document.querySelector('#country_code').value,
+			'filtered' : document.querySelector('#mirrorlist').selectedOptions;
 		}
 	})
 })

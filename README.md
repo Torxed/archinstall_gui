@@ -35,7 +35,7 @@ chmod +x /srv/archinstall_gui/webgui.py
 systemctl daemon-reload
 systemctl enable archinstall_gui.service
 EOF
-# mkdir ./airootfs/etc/skel
+# mkdir -p ./airootfs/etc/skel
 # echo '[[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && sh -c "startx"' >> ./airootfs/etc/skel/.zprofile
 ```
 
