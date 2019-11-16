@@ -58,7 +58,7 @@ http = slimhttpd.http_serve(upgrades={b'websocket': websocket}, host='127.0.0.1'
 #https = slimhttpd.https_serve(upgrades={b'websocket': websocket}, host='127.0.0.1', port=443, cert='cert.pem', key='key.pem')
 
 while 1:
-	for handler in [http, https]:
+	for handler in [http]:#, https]:
 		client = handler.accept()
 
 		#for fileno, client in handler.sockets.items():
