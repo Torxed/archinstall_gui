@@ -7,3 +7,6 @@ After=Wants=network-online.target
 Type=simple
 WorkingDirectory=/srv/archinstall_gui
 ExecStart=/srv/archinstall_gui/webgui.py
+
+[Install]
+WantedBy=multi-user.target
