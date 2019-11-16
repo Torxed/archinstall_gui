@@ -1,0 +1,9 @@
+[submodule "dependencies/archinstall"]
+	path = dependencies/archinstall
+	url = git@github.com:Torxed/archinstall.git
+[submodule "dependencies/slimHTTP"]
+	path = dependencies/slimHTTP
+	url = git@github.com:Torxed/slimHTTP.git
+[submodule "dependencies/spiderWeb"]
+	path = dependencies/spiderWeb
+	url = git@github.com:Torxed/spiderWeb.git

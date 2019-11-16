@@ -1,0 +1,212 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="./style.css">
+		<link rel="icon" type="image/png" href="./arch_linux_icon.png">
+		<title>Archinstall GUI</title>
+		<script type="text/javascript">
+			let socket = null; // Create a global socket element, initate it with `new slimWebSocket();` later
+			let backend = 'wss://127.0.0.1';
+
+			// Configuration, once set, certain fields will be blocked.
+			let drives = {};
+			let selected_drive = null;
+			let disk_password = null;
+
+			// Loading JavaScript from a cross-site resource is blocked.
+			// But there's nothing stopping us from downloading the script
+			// as a text-blob and placing it within the <script> </ script> tags,
+			// which causes the browser to parse it, but not as a forrain object.
+			//
+			// #LoadingScriptsFromGithub
+			var script = document.createElement('script');
+			script.type = 'text/javascript';
+
+			let xhr = new XMLHttpRequest();
+			xhr.open("GET", 'https://raw.githubusercontent.com/Torxed/slimWebSocket/master/slimWebSocket.js', true);
+			xhr.onreadystatechange = function() {
+				if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+					script.innerHTML = this.responseText;
+					document.head.appendChild(script);
+
+					socket = new slimWebSocket(backend);
+				}
+			}
+			xhr.send();
+
+			function sysinfo(data) {
+				document.querySelector('#adderall_version').innerHTML = `installer ${data['sysinfo']['version']}`;
+			}
+
+			function listModules(data) {
+				console.log('Listing modules:', data)
+				let modules = document.querySelector('#modules');
+				let entries = document.createElement('div');
+				let buttons = document.createElement('div');
+				entries.classList = 'entries';
+				modules.innerHTML = '';
+
+				Object.keys(data['modules']).forEach((module_name) => {
+					let entry = document.createElement('div');
+					let mod = document.createElement('button');
+					entry.classList = 'entry';
+					mod.id = 'btn_'+module_name;
+					mod.innerHTML = module_name;
+					if(data['modules'][module_name]['required'])
+						mod.innerHTML += '<img src="./required.png" style="width: 12px; height: 12px; padding-left: 10px;">'
+					mod.setAttribute('module_name', module_name);
+					mod.addEventListener('click', function() {
+						socket.send({
+							'_install_step' : module_name
+						})
+					})
+					entry.appendChild(mod);
+					entries.appendChild(entry);
+				})
+
+				modules.appendChild(entries);
+			}
+
+			function listCredentials(data) {
+				console.log(data);
+				if(typeof data['html'] !== 'undefined')
+					document.querySelector('#configuration').innerHTML = data['html'];
+
+				if(typeof data['status'] !== 'undefined' && data['status'] == 'success')
+					document.querySelector('#btn_credentials').innerHTML = 'credentials';
+
+				if(typeof data['javascript'] !== 'undefined') {
+					let script = document.querySelector('#script_credentials');
+					if(script)
+						script.remove();
+
+					script = document.createElement('script');
+					script.id = 'script_credentials';
+					script.innerHTML = data['javascript'];
+					document.head.appendChild(script);
+				}
+
+				if(typeof data['next'] !== 'undefined') {
+					socket.send({'_install_step' : data['next']});
+				}
+			}
+
+			function listHardware(data) {
+				console.log(data);
+				if(typeof data['drives'] !== 'undefined') {
+					Object.keys(data['drives']).forEach((drive) => {
+						drives[drive] = data['drives'][drive];
+					})
+				}
+
+				if(typeof data['status'] !== 'undefined' && data['status'] == 'success')
+					document.querySelector('#btn_hardware').innerHTML = 'hardware';
+
+				if(typeof data['html'] !== 'undefined')
+					document.querySelector('#configuration').innerHTML = data['html'];
+
+				if(typeof data['javascript'] !== 'undefined') {
+					let script = document.querySelector('#script_hardware');
+					if(script)
+						script.remove();
+
+					script = document.createElement('script');
+					script.id = 'script_hardware';
+					script.innerHTML = data['javascript'];
+					document.head.appendChild(script);
+				}
+
+				if(typeof data['next'] !== 'undefined') {
+					socket.send({'_install_step' : data['next']});
+				}
+			}
+
+			function listMirrors(data) {
+				console.log(data);
+
+				if(typeof data['html'] !== 'undefined')
+					document.querySelector('#configuration').innerHTML = data['html'];
+
+				if(typeof data['javascript'] !== 'undefined') {
+					let script = document.querySelector('#script_mirrors');
+					if(script)
+						script.remove();
+
+					script = document.createElement('script');
+					script.id = 'script_mirrors';
+					script.innerHTML = data['javascript'];
+					document.head.appendChild(script);
+				}
+
+				if(typeof data['next'] !== 'undefined') {
+					socket.send({'_install_step' : data['next']});
+				}
+			}
+
+			function data_router(data) {
+				if(typeof resource_handlers[data['_modules']] !== 'undefined') {
+					resource_handlers[data['_modules']](data);
+				} else {
+					console.log('Got unhandled data:', data)
+				}
+			}
+
+			window.onload = function() {
+				resource_handlers['sysinfo'] = sysinfo
+				resource_handlers['listModules'] = listModules
+				resource_handlers['credentials'] = listCredentials
+				resource_handlers['hardware'] = listHardware
+				resource_handlers['mirrors'] = listMirrors
+
+				socket.socket.addEventListener('message', function (event) {
+					let data = event.data;
+					if(typeof data == "string") {
+						try {
+							data = JSON.parse(data);
+						} catch(err) {
+							//console.log(err);
+						}
+					}
+					data_router(data);
+				});
+
+				socket.send({"_module" : "sysinfo"});
+				socket.send({"_module" : "listModules"});
+			}
+		</script>
+	</head>
+	<body>
+		<div class="container rows">
+			<div class="menu">
+				<div class="logo">
+					Arch<span>Linux</span><span class="version" id="adderall_version">installer {version}</span>
+				</div>
+				<div class="status">
+				</div>
+				<div class="menu_buttons">
+					<button class="active">Steps</button>
+					<button onClick="showLog();">Install log</button>
+				</div>
+			</div>
+			<div id="content" class="content">
+				<div class="sidemenu">
+					<div class="header">Installation Steps</div>
+					<div class="entries" id="modules">
+						<div class="loading">
+							<div class="loader">
+								<div class="loader_image rotating"></div>
+							</div>
+							<span>Loading pre-configured steps..</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="configuration expand">
+					<div class="header" id="config_header"></div>
+					<div class="step flex_grow" id="configuration">
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
