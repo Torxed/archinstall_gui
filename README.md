@@ -1,2 +1,6 @@
 # archinstall_gui
-Guided Arch Linux installer
+Graphical Arch Linux installer
+
+# Screenshot
+
+![screenshot](screenshot.png)
