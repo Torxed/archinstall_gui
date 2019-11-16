@@ -52,14 +52,11 @@ class parser():
 		print(args, kwargs)
 		if '_install_step' in data and data['_install_step'] == 'hardware':
 			if not 'hardware' in data:
+				archinstall.update_drive_list() # Updates the variable archinstall.harddrives
 				yield {
 					'html' : html,
 					'javascript' : javascript,
-					'drives' : {
-						'/dev/sda' : {'fileformat' : 'NTFS', 'size' : '512GB'},
-						'/dev/sdb' : {'fileformat' : 'NTFS', 'size' : '120GB'},
-						'/dev/nvme0' : {'fileformat' : 'Linux Filesyste', 'size' : '120GB'}
-					}
+					'drives' : archinstall.harddrives
 				}
 			else:
 				if 'dependencies' in data:

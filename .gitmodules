@@ -7,3 +7,6 @@
 [submodule "dependencies/spiderWeb"]
 	path = dependencies/spiderWeb
 	url = https://github.com/Torxed/spiderWeb.git
+[submodule "web_content/slimWebSocket"]
+	path = web_content/slimWebSocket
+	url = https://github.com/Torxed/slimWebSocket.git

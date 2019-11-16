@@ -3,10 +3,10 @@
 		<meta charset="UTF-8">
 		<link rel="stylesheet" href="./style.css">
 		<link rel="icon" type="image/png" href="./arch_linux_icon.png">
+		<script type="text/javascript" src="./dependencies/slimWebSocket/slimWebSocket.js"></script>
 		<title>Archinstall GUI</title>
 		<script type="text/javascript">
-			let socket = null; // Create a global socket element, initate it with `new slimWebSocket();` later
-			let backend = 'ws://127.0.0.1';
+			let socket = new slimWebSocket('ws://127.0.0.1');
 			var xhr = null;
 
 			// Configuration, once set, certain fields will be blocked.
@@ -23,18 +23,6 @@
 			// #LoadingScriptsFromGithub
 			var script = document.createElement('script');
 			script.type = 'text/javascript';
-
-			xhr = new XMLHttpRequest();
-			xhr.open("GET", 'https://raw.githubusercontent.com/Torxed/slimWebSocket/master/slimWebSocket.js', true);
-			xhr.onreadystatechange = function() {
-				if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-					script.innerHTML = this.responseText;
-					document.head.appendChild(script);
-
-					socket = new slimWebSocket(backend);
-				}
-			}
-			xhr.send();
 
 			function sysinfo(data) {
 				document.querySelector('#adderall_version').innerHTML = `installer ${data['sysinfo']['version']}`;

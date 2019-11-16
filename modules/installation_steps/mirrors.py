@@ -106,8 +106,16 @@ class parser():
 						'status' : 'success',
 						'mirrorlist' : storage['mirrors']
 					}
+				elif type(data['mirrors']) == dict:
+					region = data['mirrors']['region']
+					filtered = data['mirrors']['filtered']
+
+					if len(region):
+						print('All mirrors from a region was selected')
+					if len(filtered):
+						print('Specific filtered objects were selected')
 				else:
 					yield {
 						'status' : 'success',
-						'next' : 'language'
+						'next' : 'template'
 					}
