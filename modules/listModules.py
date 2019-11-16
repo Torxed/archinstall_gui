@@ -12,7 +12,7 @@ class parser():
 					'hardware' : {'required' : True, 'defaults' : {}},
 					'mirrors' : {'required' : False, 'defaults' : {}},
 					'template' : {'required' : False, 'defaults' : {}},
-					'software' : {'required' : False, 'defaults' : {}}
-					'language' : {'required' : False, 'defaults' : {}},
+					'software' : {'required' : False, 'defaults' : {}},
+					'language' : {'required' : False, 'defaults' : {}}
 				})
 			}
