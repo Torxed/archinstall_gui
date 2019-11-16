@@ -1,7 +1,7 @@
 [Unit]
 Description=Arch Linux installer Web GUI
-Requires=network
-After=network
+Wants=Wants=network-online.target
+After=Wants=network-online.target
 
 [Service]
 Type=simple
