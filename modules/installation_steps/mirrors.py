@@ -5,11 +5,11 @@ from time import time
 
 html = """
 <div class="padded_content flex_grow flex column">
-	<h3>Choose mirror options</h3>
+	<h3>Choose mirror<i>(s) (Optional)</i></h3>
 	<span>Here's your chance to select region/specific mirrors.<br>{additional_info}</span>
 	<div class="form-area" id="form-area">
 		<div class="input-form" id="input-form">
-			<input type="password" id="country_code" required autocomplete="off" />
+			<input type="text" id="country_code" required autocomplete="off" />
 			<label class="label">
 				<span class="label-content">Filter by country code <i>(Ex: SE = Sweden)</i></span>
 			</label>
@@ -34,7 +34,7 @@ document.querySelector('#save_mirrors').addEventListener('click', function() {
 		'_install_step' : 'mirrors',
 		'mirrors' : {
 			'region' : document.querySelector('#country_code').value,
-			'filtered' : document.querySelector('#mirrorlist').selectedOptions;
+			'specific' : document.querySelector('#mirrorlist').selectedOptions
 		}
 	})
 })
@@ -57,8 +57,10 @@ window.refresh_mirrorlist = () => {
 }
 
 window.update_mirrorlist = (data) => {
-	window.mirror_list = data['mirrorlist'];
-	window.refresh_mirrorlist();
+	if(typeof data['mirrorlist'] !== 'undefined') {
+		window.mirror_list = data['mirrorlist'];
+		window.refresh_mirrorlist();
+	}
 }
 
 /* Sweden */
@@ -85,12 +87,7 @@ class parser():
 				
 				yield {
 					'html' : html.format(additional_info=additional_info),
-					'javascript' : javascript,
-					'all_mirrors' : {
-						'/dev/sda' : {'fileformat' : 'NTFS', 'size' : '512GB'},
-						'/dev/sdb' : {'fileformat' : 'NTFS', 'size' : '120GB'},
-						'/dev/nvme0' : {'fileformat' : 'Linux Filesyste', 'size' : '120GB'}
-					}
+					'javascript' : javascript
 				}
 			else:
 				if data['mirrors'] == 'refresh':
@@ -107,15 +104,10 @@ class parser():
 						'mirrorlist' : storage['mirrors']
 					}
 				elif type(data['mirrors']) == dict:
-					region = data['mirrors']['region']
-					filtered = data['mirrors']['filtered']
+					storage['mirror_region'] = data['mirrors']['region']
+					storage['mirror_specific'] = data['mirrors']['specific']
 
-					if len(region):
-						print('All mirrors from a region was selected')
-					if len(filtered):
-						print('Specific filtered objects were selected')
-				else:
 					yield {
 						'status' : 'success',
-						'next' : 'template'
+						'next' : 'templates'
 					}

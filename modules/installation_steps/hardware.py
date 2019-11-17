@@ -5,7 +5,7 @@ html = """
 <div class="padded_content flex_grow flex column">
 	<h3>Hardware setup</h3>
 	<span>In this step, you'll choose which drive to install on.<br><b><u>Important to note</u></b> is that once the "Start formatting" button is pressed, the <u>format process will start immediately</u>.<br>You can safely change drive without risk of formatting tho.</span>
-	<select id="drives">
+	<select id="drives" class="flex_grow" size="3">
 		
 	</select>
 	<div class="drive_information">
@@ -26,7 +26,7 @@ window.drives_dropdown = document.querySelector('#drives');
 Object.keys(drives).forEach((drive) => {
 	let option = document.createElement('option');
 	option.value = drive;
-	option.innerHTML = `${drive} (${drives[drive]['size']}, ${drives[drive]['fileformat']})`;
+	option.innerHTML = `${drive} (${drives[drive]['size']}, ${drives[drive]['fileformats']}, ${drives[drive]['labels']})`;
 	window.drives_dropdown.appendChild(option);
 })
 

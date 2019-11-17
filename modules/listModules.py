@@ -11,7 +11,7 @@ class parser():
 					'credentials' : {'required' : True, 'defaults' : {}},
 					'hardware' : {'required' : True, 'defaults' : {}},
 					'mirrors' : {'required' : False, 'defaults' : {}},
-					'template' : {'required' : False, 'defaults' : {}},
+					'templates' : {'required' : False, 'defaults' : {}},
 					'software' : {'required' : False, 'defaults' : {}},
 					'language' : {'required' : False, 'defaults' : {}}
 				})

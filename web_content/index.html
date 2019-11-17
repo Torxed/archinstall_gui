@@ -3,7 +3,7 @@
 		<meta charset="UTF-8">
 		<link rel="stylesheet" href="./style.css">
 		<link rel="icon" type="image/png" href="./arch_linux_icon.png">
-		<script type="text/javascript" src="./dependencies/slimWebSocket/slimWebSocket.js"></script>
+		<script type="text/javascript" src="./slimWebSocket/slimWebSocket.js"></script>
 		<title>Archinstall GUI</title>
 		<script type="text/javascript">
 			let socket = new slimWebSocket('ws://127.0.0.1');
@@ -55,6 +55,30 @@
 				})
 
 				modules.appendChild(entries);
+			}
+
+			function genericStepLoader(data) {
+				console.log(data);
+				if(typeof data['html'] !== 'undefined')
+					document.querySelector('#configuration').innerHTML = data['html'];
+
+				if(typeof data['status'] !== 'undefined' && data['status'] == 'success')
+					document.querySelector('#btn_'+data['_modules']).innerHTML = data['_modules'];
+
+				if(typeof data['javascript'] !== 'undefined') {
+					let script = document.querySelector('#script_'+data['_modules']);
+					if(script)
+						script.remove();
+
+					script = document.createElement('script');
+					script.id = 'script_'+data['_modules'];
+					script.innerHTML = data['javascript'];
+					document.head.appendChild(script);
+				}
+
+				if(typeof data['next'] !== 'undefined') {
+					socket.send({'_install_step' : data['next']});
+				}
 			}
 
 			function listCredentials(data) {
@@ -146,6 +170,10 @@
 				}
 			}
 
+			window.show_install_log = function() {
+				socket.send({'_install_step' : 'install_log'});
+			}
+
 			window.onload = function() {
 				resource_handlers['sysinfo'] = sysinfo
 				resource_handlers['listModules'] = listModules
@@ -153,6 +181,14 @@
 				resource_handlers['hardware'] = listHardware
 				resource_handlers['mirrors'] = [];
 				resource_handlers['mirrors'].push(listMirrors);
+				resource_handlers['templates'] = [];
+				resource_handlers['templates'].push(genericStepLoader);
+				resource_handlers['software'] = [];
+				resource_handlers['software'].push(genericStepLoader);
+				resource_handlers['language'] = [];
+				resource_handlers['language'].push(genericStepLoader);
+				resource_handlers['install_log'] = [];
+				resource_handlers['install_log'].push(genericStepLoader);
 
 				socket.socket.addEventListener('message', function (event) {
 					let data = event.data;
@@ -181,7 +217,7 @@
 				</div>
 				<div class="menu_buttons">
 					<button class="active">Steps</button>
-					<button onClick="showLog();">Install log</button>
+					<button onClick="show_install_log();">Install log</button>
 				</div>
 			</div>
 			<div id="content" class="content">
