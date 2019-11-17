@@ -16,6 +16,13 @@ from lib.worker import _spawn
 from lib.websocket import pre_parser
 from dependencies.archinstall import archinstall as _archinstall
 
+## This protects any actions against the filesystem.
+#  (Useful for when debugging) #SafetyNotGuaranteed
+if isfile('./SAFETY_LOCK'):
+	SAFETY_LOCK = True
+else:
+	SAFETY_LOCK = False
+
 def sig_handler(signal, frame):
 	http.close()
 	https.close()
@@ -33,7 +40,7 @@ __builtins__.__dict__['spawn'] = _spawn
 __builtins__.__dict__['sys_command'] = _sys_command
 __builtins__.__dict__['archinstall'] = _archinstall
 __builtins__.__dict__['modules'] = oDict()
-__builtins__.__dict__['storage'] = safedict()
+__builtins__.__dict__['storage'] = safedict({'SAFETY_LOCK' : SAFETY_LOCK})
 __builtins__.__dict__['progress'] = oDict()
 __builtins__.__dict__['sockets'] = safedict()
 __builtins__.__dict__['config'] = safedict({

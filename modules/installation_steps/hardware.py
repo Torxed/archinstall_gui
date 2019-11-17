@@ -69,11 +69,17 @@ class parser():
 							return None # Break
 
 				storage['drive'] = data['hardware']['drive']
-				print(archinstall)
-
+				storage['start'] = '512MiB'
+				storage['size'] = '100%'
 				progress['formatting'] = True
 
-				print('Yielding')
+				if not storage['SAFETY_LOCK']:
+					print('Formatting drive:', storage['drive'])
+					#print(archinstall.close_disks())
+					#print(archinstall.format_disk(storage['drive'], start=storage['start'], end=storage['size']))
+				else:
+					print('Emulating: Formatting drive:', storage['drive'])
+
 				yield {
 					'status' : 'success',
 					'next' : 'mirrors'
