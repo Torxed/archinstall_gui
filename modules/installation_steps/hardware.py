@@ -23,12 +23,15 @@ html = """
 javascript = """
 window.drives_dropdown = document.querySelector('#drives');
 
-Object.keys(drives).forEach((drive) => {
-	let option = document.createElement('option');
-	option.value = drive;
-	option.innerHTML = `${drive} (${drives[drive]['size']}, ${drives[drive]['fileformats']}, ${drives[drive]['labels']})`;
-	window.drives_dropdown.appendChild(option);
-})
+window.refresh_drives = () => {
+	window.drives_dropdown.innerHTML = '';
+	Object.keys(drives).forEach((drive) => {
+		let option = document.createElement('option');
+		option.value = drive;
+		option.innerHTML = `${drive} (${drives[drive]['size']}, ${drives[drive]['fileformats']}, ${drives[drive]['labels']})`;
+		window.drives_dropdown.appendChild(option);
+	})
+}
 
 window.drives_dropdown.addEventListener('change', function(obj) {
 	selected_drive = this.value;
@@ -45,17 +48,39 @@ document.querySelector('#start_format').addEventListener('click', function() {
 	})
 })
 
+window.update_drives = (data) => {
+	if(typeof data['drives'] !== 'undefined') {
+		Object.keys(data['drives']).forEach((drive) => {
+			drives[drive] = data['drives'][drive];
+		})
+		window.refresh_drives()
+	}
+}
+
+if(typeof resource_handlers['hardware'] === 'undefined')
+	resource_handlers['hardware'] = [update_drives];
+else if(resource_handlers['hardware'].length == 1)
+	resource_handlers['hardware'].push(update_drives)
+
+socket.send({
+	'_install_step' : 'hardware',
+	'hardware' : 'refresh'
+})
+
 """
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
-		print(args, kwargs)
 		if '_install_step' in data and data['_install_step'] == 'hardware':
 			if not 'hardware' in data:
 				archinstall.update_drive_list() # Updates the variable archinstall.harddrives
+				print('Returning drivces')
 				yield {
 					'html' : html,
-					'javascript' : javascript,
+					'javascript' : javascript
+				}
+			elif 'hardware' in data and data['hardware'] == 'refresh':
+				yield {
 					'drives' : archinstall.harddrives
 				}
 			else:
@@ -71,10 +96,16 @@ class parser():
 				storage['drive'] = data['hardware']['drive']
 				storage['start'] = '512MiB'
 				storage['size'] = '100%'
+
+				archinstall.args['drive'] = storage['drive']
+				archinstall.args['start'] = storage['start']
+				archinstall.args['size'] = storage['size']
+				
 				progress['formatting'] = True
 
 				if not storage['SAFETY_LOCK']:
 					print('Formatting drive:', storage['drive'])
+					
 					#print(archinstall.close_disks())
 					#print(archinstall.format_disk(storage['drive'], start=storage['start'], end=storage['size']))
 				else:

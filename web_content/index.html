@@ -105,7 +105,7 @@
 				}
 			}
 
-			function listHardware(data) {
+			/*function listHardware(data) {
 				console.log(data);
 				if(typeof data['drives'] !== 'undefined') {
 					Object.keys(data['drives']).forEach((drive) => {
@@ -133,7 +133,7 @@
 				if(typeof data['next'] !== 'undefined') {
 					socket.send({'_install_step' : data['next']});
 				}
-			}
+			}*/
 
 			function listMirrors(data) {
 				console.log(data);
@@ -178,9 +178,10 @@
 				resource_handlers['sysinfo'] = sysinfo
 				resource_handlers['listModules'] = listModules
 				resource_handlers['credentials'] = listCredentials
-				resource_handlers['hardware'] = listHardware
+				resource_handlers['hardware'] = [];
+				resource_handlers['hardware'].push(genericStepLoader);
 				resource_handlers['mirrors'] = [];
-				resource_handlers['mirrors'].push(listMirrors);
+				resource_handlers['mirrors'].push(genericStepLoader);
 				resource_handlers['templates'] = [];
 				resource_handlers['templates'].push(genericStepLoader);
 				resource_handlers['software'] = [];

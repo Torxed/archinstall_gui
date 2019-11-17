@@ -1,5 +1,7 @@
 import sys
 import importlib.util
+from os import urandom
+from hashlib import sha512
 from subprocess import Popen, STDOUT, PIPE
 
 def _sys_command(cmd, opts=None, *args, **kwargs):

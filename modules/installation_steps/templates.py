@@ -60,7 +60,6 @@ socket.send({'_install_step' : 'templates', 'templates' : 'refresh'})
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
-		print(args, kwargs)
 		if '_install_step' in data and data['_install_step'] == 'templates':
 			if not 'templates' in data and not 'template' in data:
 				if not 'pacstrap' in progress:

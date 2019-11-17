@@ -3,9 +3,7 @@
 import signal, time, json
 import shlex, pty, os
 import sys, traceback
-from os import walk, urandom, getcwd
 from os.path import splitext, basename, isdir, isfile, abspath
-from hashlib import sha512
 from json import JSONEncoder, dumps, loads
 from collections import OrderedDict as oDict
 

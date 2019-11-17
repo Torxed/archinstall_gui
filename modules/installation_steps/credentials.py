@@ -43,7 +43,6 @@ document.querySelector('#saveButton').addEventListener('click', function() {
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
-		print(args, kwargs)
 		if '_install_step' in data and data['_install_step'] == 'credentials':
 			if not 'credentials' in data:
 				yield {
@@ -54,6 +53,7 @@ class parser():
 				## We got credentials to store, not just calling this module.
 				if len(data['credentials']) == 1 and not 'formating' in progress:
 					storage['credentials'] = data['credentials']
+					archinstall.args['password'] = storage['credentials']
 					yield {
 						'status' : 'success',
 						'next' : 'hardware'

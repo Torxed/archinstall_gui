@@ -30,7 +30,6 @@ document.querySelector('#save_language').addEventListener('click', function() {
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
-		print(args, kwargs)
 		if '_install_step' in data and data['_install_step'] == 'language':
 			if not 'language' in data:
 				yield {

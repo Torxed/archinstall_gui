@@ -77,7 +77,6 @@ socket.send({'_install_step' : 'mirrors', 'mirrors' : 'refresh'})
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
-		print(args, kwargs)
 		if '_install_step' in data and data['_install_step'] == 'mirrors':
 			if not 'mirrors' in data:
 				if not 'pacstrap' in progress:

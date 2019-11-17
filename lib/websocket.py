@@ -1,4 +1,4 @@
-import json
+import json, traceback
 from collections.abc import Iterator
 
 class pre_parser():
@@ -55,3 +55,4 @@ class pre_parser():
 						}
 			except BaseException as e:
 				log(f'Module error: {e}', level=2, origin='pre_parser', function='parse')
+				log(traceback.print_exc(), level=2, origin='pre_parser', function='parse')

@@ -28,9 +28,8 @@ document.querySelector('#refresh_button').addEventListener('click', function() {
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
-		print(args, kwargs)
 		if '_install_step' in data and data['_install_step'] == 'install_log':
-			log = ''
+			log = '\n'.join(archinstall.commandlog)
 			yield {
 				'html' : html.format(log=log),
 				'javascript' : javascript
