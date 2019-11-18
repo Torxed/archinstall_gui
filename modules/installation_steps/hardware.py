@@ -68,8 +68,13 @@ socket.send({
 })
 
 """
-def notify(worker, *args, **kwargs):
-	pass
+def notify_partitioning_done(worker, *args, **kwargs):
+	sockets[worker.client.fileno].send({
+		'type' : 'notification',
+		'source' : 'hardware',
+		'message' : 'Paritioning is done',
+		'status' : 'done'
+	})
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
@@ -108,12 +113,16 @@ class parser():
 				progress['formatting'] = True
 
 				if not storage['SAFETY_LOCK']:
-					print('Formatting drive:', storage['drive'])
-					
 					archinstall.cache_diskpw_on_disk()
 					archinstall.close_disks()
-					fmt = spawn(archinstall.format_disk, callback=notify, drive=storage['drive'], start=storage['start'], end=storage['size'])
-					refresh = spawn(archinstall.refresh_partition_list, callback=notify, drive=storage['drive'], dependency=fmt)
+					fmt = spawn(client, archinstall.format_disk, drive=storage['drive'], start=storage['start'], end=storage['size'])
+					refresh = spawn(client, archinstall.refresh_partition_list, drive=storage['drive'], dependency=fmt)
+					mkfs = spawn(client, archinstall.mkfs_fat32, drive=storage['drive'], partition=archinstall.args['partition_1'], dependency=refresh)
+					encrypt = spawn(client, archinstall.encrypt_partition, drive=storage['drive'], partition=archinstall.args['partition_2'], keyfile=archinstall.args['pwfile'], dependency=mkfs)
+					mount_luksdev = spawn(client, archinstall.mount_luktsdev, drive=storage['drive'], partition=archinstall.args['partition_2'], keyfile=archinstall.args['pwfile'], dependency=encrypt)
+					btrfs = spawn(client, archinstall.mkfs_btrfs, dependency=mount_luksdev)
+					mount = spawn(client, archinstall.mount_mountpoints, drive=storage['drive'], bootpartition=archinstall.args['partition_1'], callback=notify_partitioning_done, dependency=btrfs)
+
 				else:
 					print('Emulating: Formatting drive:', storage['drive'])
 
