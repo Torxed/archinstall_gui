@@ -112,7 +112,7 @@ class parser():
 					archinstall.cache_diskpw_on_disk()
 					archinstall.close_disks()
 					fmt = spawn(archinstall.format_disk, callback=notify, drive=storage['drive'], start=storage['start'], end=storage['size'])
-					refresh = spawn(refresh_partition_list, callback=notify, drive=storage['drive'], dependency=fmt)
+					refresh = spawn(archinstall.refresh_partition_list, callback=notify, drive=storage['drive'], dependency=fmt)
 				else:
 					print('Emulating: Formatting drive:', storage['drive'])
 
