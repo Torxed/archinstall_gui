@@ -68,6 +68,8 @@ socket.send({
 })
 
 """
+def notify(worker, *args, **kwargs):
+	pass
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
@@ -103,13 +105,12 @@ class parser():
 				
 				progress['formatting'] = True
 
-				print(json.dumps(archinstall.args, indent=4))
-
 				if not storage['SAFETY_LOCK']:
 					print('Formatting drive:', storage['drive'])
 					
-					#print(archinstall.close_disks())
-					#print(archinstall.format_disk(storage['drive'], start=storage['start'], end=storage['size']))
+					archinstall.cache_diskpw_on_disk()
+					archinstall.close_disks()
+					spawn(archinstall.format_disk, callback=notify, start=args['start'], end=args['size'])
 				else:
 					print('Emulating: Formatting drive:', storage['drive'])
 
