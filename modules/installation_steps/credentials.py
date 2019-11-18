@@ -52,8 +52,11 @@ class parser():
 			else:
 				## We got credentials to store, not just calling this module.
 				if len(data['credentials']) == 1 and not 'formating' in progress:
+					archinstall.args = setup_args_defaults(archinstall.args)
+					
 					storage['credentials'] = data['credentials']
 					archinstall.args['password'] = storage['credentials']
+
 					yield {
 						'status' : 'success',
 						'next' : 'hardware'
