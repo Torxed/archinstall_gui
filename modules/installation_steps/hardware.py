@@ -103,6 +103,8 @@ class parser():
 				
 				progress['formatting'] = True
 
+				print(json.dumps(archinstall.args, indent=4))
+
 				if not storage['SAFETY_LOCK']:
 					print('Formatting drive:', storage['drive'])
 					
