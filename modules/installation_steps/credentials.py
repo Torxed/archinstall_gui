@@ -55,7 +55,7 @@ class parser():
 					archinstall.args = archinstall.setup_args_defaults(archinstall.args)
 
 					storage['credentials'] = data['credentials']
-					archinstall.args['password'] = storage['credentials']
+					archinstall.args['password'] = storage['credentials']['disk_password']
 
 					yield {
 						'status' : 'success',
