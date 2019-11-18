@@ -19,6 +19,7 @@ class _spawn(Thread):
 		self.start()
 
 	def run(self):
+		print('RUNNING')
 		main = None
 		for t in tenum():
 			if t.name == 'MainThread':
