@@ -103,6 +103,7 @@ class parser():
 				archinstall.args['start'] = storage['start']
 				archinstall.args['size'] = storage['size']
 				
+				print(json.dumps(archinstall.args, indent=4))
 				progress['formatting'] = True
 
 				if not storage['SAFETY_LOCK']:
