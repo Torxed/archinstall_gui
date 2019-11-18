@@ -72,6 +72,8 @@ class parser():
 				if len(data['credentials']) == 1 and not 'formating' in progress:
 					archinstall.args = archinstall.setup_args_defaults(archinstall.args)
 
+					print(json.dumps(archinstall.args, indent=4))
+
 					storage['credentials'] = data['credentials']
 					archinstall.args['password'] = storage['credentials']['disk_password']
 
@@ -79,6 +81,7 @@ class parser():
 						'status' : 'success',
 						'next' : 'hardware'
 					}
+
 				elif len(data['credentials']) == 1:
 					yield {
 						'status' : 'failed',
