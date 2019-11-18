@@ -13,6 +13,14 @@ html = """
 			</label>
 		</div>
 	</div>
+	<div class="form-area" id="form-area">
+		<div class="input-form" id="input-form">
+			<input type="text" id="hostname" required autocomplete="off" />
+			<label class="label">
+				<span class="label-content">Give this machine a hostname on the network <i>(optional)</i></span>
+			</label>
+		</div>
+	</div>
 	<div class="buttons bottom" id="buttons">
 		<button id="saveButton">Save configuration</button>
 	</div>
@@ -21,10 +29,15 @@ html = """
 
 javascript = """
 window.disk_password_input = document.querySelector('#disk_password');
+window.hostname_input = document.querySelector('#hostname');
 
 if(disk_password) {
 	disk_password_input.value = disk_password;
 	disk_password_input.disabled = true;
+}
+
+if(hostname) {
+	hostname_input.value = hostname;
 }
 
 document.querySelector('#saveButton').addEventListener('click', function() {
@@ -32,10 +45,15 @@ document.querySelector('#saveButton').addEventListener('click', function() {
 		disk_password = document.querySelector('#disk_password').value;
 	}
 
+	if(!hostname) {
+		hostname = document.querySelector('#hostname').value;
+	}
+
 	socket.send({
 		'_install_step' : 'credentials',
 		'credentials' : {
-			'disk_password' : disk_password
+			'disk_password' : disk_password,
+			'hostname' : hostname
 		}
 	})
 })

@@ -11,7 +11,7 @@ html = """
 		<div class="input-form" id="input-form">
 			<input type="text" id="country_code" required autocomplete="off" />
 			<label class="label">
-				<span class="label-content">Filter by country code <i>(Ex: SE = Sweden)</i></span>
+				<span class="label-content">Filter by country code(s), separate with , <i>(Ex: SE,UK = Sweden and United Kingdom)</i>.</span>
 			</label>
 		</div>
 	</div>
@@ -105,6 +105,8 @@ class parser():
 				elif type(data['mirrors']) == dict:
 					storage['mirror_region'] = data['mirrors']['region']
 					storage['mirror_specific'] = data['mirrors']['specific']
+
+					spawn(client, archinstall.filter_mirrors_by_country, countries=storage['mirror_region'], dependency='formatting')
 
 					yield {
 						'status' : 'success',

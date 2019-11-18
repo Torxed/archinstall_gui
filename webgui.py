@@ -39,7 +39,9 @@ __builtins__.__dict__['sys_command'] = _sys_command
 __builtins__.__dict__['archinstall'] = _archinstall
 __builtins__.__dict__['modules'] = oDict()
 __builtins__.__dict__['storage'] = safedict({'SAFETY_LOCK' : SAFETY_LOCK})
-__builtins__.__dict__['progress'] = oDict()
+__builtins__.__dict__['progress'] = oDict({
+	'formatting' : None,
+})
 __builtins__.__dict__['sockets'] = safedict()
 __builtins__.__dict__['config'] = safedict({
 	'slimhttp': {

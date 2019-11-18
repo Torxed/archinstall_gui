@@ -58,6 +58,14 @@ socket.send({'_install_step' : 'templates', 'templates' : 'refresh'})
 
 """
 
+def notify_template_installed(worker, *args, **kwargs):
+	sockets[worker.client.sock.fileno()].send({
+		'type' : 'notification',
+		'source' : 'bootloader_install',
+		'message' : 'Bootloader has been installed and configured.',
+		'status' : 'done'
+	})
+
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
 		if '_install_step' in data and data['_install_step'] == 'templates':
@@ -91,7 +99,9 @@ class parser():
 				elif type(data['templates']) == dict:
 					pass
 			elif 'template' in data:
-				print('Selected specific template')
+				
+				progress['install_template'] = spawn(client, archinstall.run_post_install_steps, callback=notify_template_installed, dependency=progress['configure_base_system'])
+
 				yield {
 						'status' : 'success',
 						'next' : 'software'

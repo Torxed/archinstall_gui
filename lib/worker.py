@@ -32,14 +32,26 @@ class _spawn(Thread):
 			return
 		
 		if 'dependency' in self.kwargs:
-			print(self.func, 'is waiting for', self.kwargs['dependency'].func)
-			while main and main.isAlive() and self.kwargs['dependency'].ended is None:
+			dependency = self.kwargs['dependency']
+			if type(dependency) == str:
+				# Dependency is a progress-string. Wait for it to show up.
+				while main and main.isAlive() and dependency not in progress or progress[dependency] is None:
+					time.sleep(0.25)
+				dependency = progress[dependency]
+
+			if type(dependency) == str:
+				log(f"{self.func} waited for progress {dependency} which never showed up. Aborting.", level=2, origin='worker', function='run')
+				self.ended = time.time()
+				self.status = 'aborted'
+				return None
+
+			while main and main.isAlive() and dependency.ended is None:
 				time.sleep(0.25)
 
 			print('  *** Dependency released for:', self.func)
 
-			if self.kwargs['dependency'].data is None or not main or not main.isAlive():
-				log('Dependency:', self.kwargs['dependency'].func, 'did not exit clearly. There for,', self.func, 'can not execute.', level=2, origin='worker', function='run')
+			if dependency.data is None or not main or not main.isAlive():
+				log('Dependency:', dependency.func, 'did not exit clearly. There for,', self.func, 'can not execute.', level=2, origin='worker', function='run')
 				self.ended = time.time()
 				self.status = 'aborted'
 				return None
