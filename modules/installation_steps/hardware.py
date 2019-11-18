@@ -86,6 +86,7 @@ class parser():
 					'drives' : archinstall.harddrives
 				}
 			else:
+				print('ONCE?')
 				if 'dependencies' in data:
 					for dependency in data['dependencies']:
 						if not dependency in storage:
