@@ -117,11 +117,11 @@ class parser():
 					archinstall.close_disks()
 					fmt = spawn(client, archinstall.format_disk, drive='drive', start='start', end='size')
 					refresh = spawn(client, archinstall.refresh_partition_list, drive='drive', dependency=fmt)
-					mkfs = spawn(client, archinstall.mkfs_fat32, drive='drive', partition='partition_1', dependency=refresh)
-					encrypt = spawn(client, archinstall.encrypt_partition, drive='drive', partition='partition_2', keyfile='pwfile', dependency=mkfs)
-					mount_luksdev = spawn(client, archinstall.mount_luktsdev, drive='drive', partition='partition_2', keyfile='pwfile', dependency=encrypt)
+					mkfs = spawn(client, archinstall.mkfs_fat32, drive='drive', partition='1', dependency=refresh)
+					encrypt = spawn(client, archinstall.encrypt_partition, drive='drive', partition='2', keyfile='pwfile', dependency=mkfs)
+					mount_luksdev = spawn(client, archinstall.mount_luktsdev, drive='drive', partition='2', keyfile='pwfile', dependency=encrypt)
 					btrfs = spawn(client, archinstall.mkfs_btrfs, dependency=mount_luksdev)
-					mount = spawn(client, archinstall.mount_mountpoints, drive='drive', bootpartition='partition_1', callback=notify_partitioning_done, dependency=btrfs)
+					mount = spawn(client, archinstall.mount_mountpoints, drive='drive', bootpartition='1', callback=notify_partitioning_done, dependency=btrfs)
 
 				else:
 					print('Emulating: Formatting drive:', storage['drive'])
