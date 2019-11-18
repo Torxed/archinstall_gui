@@ -16,8 +16,6 @@ class _spawn(Thread):
 		self.ended = None
 		self.worker_id = kwargs['worker_id']
 		self.status = 'starting'
-
-		if start_callback: start_callback(self, *args, **kwargs)
 		self.start()
 
 	def run(self):
@@ -31,13 +29,23 @@ class _spawn(Thread):
 			print('Main thread not existing')
 			return
 		
+		if 'dependency' in self.kwargs:
+			while self.kwargs['dependency'].ended is None:
+				time.sleep(0.25)
+			if self.kwargs['dependency'].data is None:
+				log('Dependency:', self.kwargs['dependency'].func, 'did not exit clearly. There for,', self.func, 'can not execute.', level=2, origin='worker', function='run')
+				self.ended = time.time()
+				self.status = 'aborted'
+				return None
+
+		if start_callback: start_callback(self, *args, **kwargs)
 		self.status = 'running'
 		self.data = self.func(*self.args, **self.kwargs)
 
 		self.ended = time.time()
 		
-		if 'dependency' in self.kwargs:
-			pass
-
-		if self.callback:
+		if self.data is None:
+			log(self.func, 'did not exit clearly.', level=2, origin='worker', function='run')
+			self.status = 'failed'
+		elif self.callback:
 			self.callback(self, *self.args, **self.kwargs)
