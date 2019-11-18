@@ -32,14 +32,17 @@ class _spawn(Thread):
 			return
 		
 		if 'dependency' in self.kwargs:
-			while self.kwargs['dependency'].ended is None:
+			print(self.func, 'is waiting for', self.kwargs['dependency'].func)
+			while main and main.isAlive() and self.kwargs['dependency'].ended is None:
 				time.sleep(0.25)
-			if self.kwargs['dependency'].data is None:
+
+			if self.kwargs['dependency'].data is None or not main or not main.isAlive():
 				log('Dependency:', self.kwargs['dependency'].func, 'did not exit clearly. There for,', self.func, 'can not execute.', level=2, origin='worker', function='run')
 				self.ended = time.time()
 				self.status = 'aborted'
 				return None
 
+		print(self.func, 'is now being called')
 		log(self.func, 'is being called.', level=4, origin='worker', function='run')
 		if self.start_callback: self.start_callback(self, *args, **kwargs)
 		self.status = 'running'
