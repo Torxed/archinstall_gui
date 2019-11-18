@@ -69,7 +69,7 @@ socket.send({
 
 """
 def notify_partitioning_done(worker, *args, **kwargs):
-	sockets[worker.client.socket.fileno()].send({
+	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
 		'source' : 'hardware',
 		'message' : 'Paritioning is done',
