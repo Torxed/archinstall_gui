@@ -111,7 +111,7 @@ class parser():
 					
 					archinstall.cache_diskpw_on_disk()
 					archinstall.close_disks()
-					spawn(archinstall.format_disk, callback=notify, start=args['start'], end=args['size'])
+					spawn(archinstall.format_disk, callback=notify, drive=storage['drive'], start=storage['start'], end=storage['size'])
 				else:
 					print('Emulating: Formatting drive:', storage['drive'])
 
