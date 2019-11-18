@@ -38,7 +38,7 @@ class _spawn(Thread):
 				self.status = 'aborted'
 				return None
 
-		if start_callback: start_callback(self, *args, **kwargs)
+		if self.start_callback: self.start_callback(self, *args, **kwargs)
 		self.status = 'running'
 		self.data = self.func(*self.args, **self.kwargs)
 
