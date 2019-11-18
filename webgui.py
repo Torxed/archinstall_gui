@@ -23,7 +23,7 @@ else:
 
 def sig_handler(signal, frame):
 	http.close()
-	https.close()
+	#https.close()
 	exit(0)
 signal.signal(signal.SIGINT, sig_handler)
 
