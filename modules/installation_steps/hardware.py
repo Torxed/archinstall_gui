@@ -69,6 +69,7 @@ socket.send({
 
 """
 def notify_partitioning_done(worker, *args, **kwargs):
+	print('Giving shoutout to:', worker.client.fileno)
 	sockets[worker.client.fileno].send({
 		'type' : 'notification',
 		'source' : 'hardware',
