@@ -22,7 +22,7 @@ javascript = """
 
 document.querySelector('#save_packages').addEventListener('click', function() {
 	socket.send({
-		'_install_step' : 'software',
+		'_install_step' : 'base_os',
 		'packages' : document.querySelector('#software_list').value
 	})
 })
@@ -45,18 +45,18 @@ window.update_packages = (data) => {
 		document.querySelector('#software_list').value = data['packages']
 }
 
-if(typeof resource_handlers['software'] === 'undefined')
-	resource_handlers['software'] = [update_packages];
-else if(resource_handlers['software'].length == 1)
-	resource_handlers['software'].push(update_packages)
+if(typeof resource_handlers['base_os'] === 'undefined')
+	resource_handlers['base_os'] = [update_packages];
+else if(resource_handlers['base_os'].length == 1)
+	resource_handlers['base_os'].push(update_packages)
 
-socket.send({'_install_step' : 'software', 'packages' : 'refresh'})
+socket.send({'_install_step' : 'base_os', 'packages' : 'refresh'})
 
 """
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
-		if '_install_step' in data and data['_install_step'] == 'software':
+		if '_install_step' in data and data['_install_step'] == 'base_os':
 			if not 'packages' in data:
 				if not 'pacstrap' in progress:
 					additional_info = "Template steps won't be installed until after the base system has been installed.."
