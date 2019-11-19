@@ -33,6 +33,7 @@ EOF
 # cat <<EOF >> ./airootfs/root/customize_airootfs.sh
 cd /root
 git clone --recursive https://github.com/Torxed/archinstall_gui.git
+cd archinstall_gui/dependencies/archinstall; git checkout cleanup; cd -
 cp archinstall_gui/INSTALL/archinstall_gui.service /etc/systemd/system/
 cp archinstall_gui/INSTALL/xinitrc /etc/X11/xinit/
 cp -r archinstall_gui /srv/
