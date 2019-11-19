@@ -143,7 +143,7 @@ class parser():
 					encrypt = spawn(client, archinstall.encrypt_partition, drive='drive', partition='2', keyfile='pwfile', dependency=mkfs)
 					mount_luksdev = spawn(client, archinstall.mount_luktsdev, drive='drive', partition='2', keyfile='pwfile', dependency=encrypt)
 					btrfs = spawn(client, archinstall.mkfs_btrfs, dependency=mount_luksdev)
-					progress['formatting'] = spawn(client, archinstall.mount_mountpoints, drive='drive', bootpartition='1', callback=notify_partitioning_done, dependency=btrfs)
+					progress['formatting'] = spawn(client, archinstall.mount_mountpoints, debug=True, drive='drive', bootpartition='1', callback=notify_partitioning_done, dependency=btrfs)
 					progress['strap_in'] = spawn(client, archinstall.strap_in_base, debug=True, callback=notify_base_install_done, dependency=progress['formatting'])
 					progress['configure_base_system'] = spawn(client, archinstall.configure_base_system, debug=True, callback=notify_base_configuration, dependency=progress['strap_in'])
 					progress['setup_bootloader'] = spawn(client, archinstall.setup_bootloader, debug=True, callback=notify_bootloader_completion, dependency=progress['configure_base_system'])
