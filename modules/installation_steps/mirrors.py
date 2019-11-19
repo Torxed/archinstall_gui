@@ -75,6 +75,14 @@ socket.send({'_install_step' : 'mirrors', 'mirrors' : 'refresh'})
 
 """
 
+def notify_mirrors_complete(worker, *args, **kwargs):
+	sockets[worker.client.sock.fileno()].send({
+		'type' : 'notification',
+		'source' : 'mirrors',
+		'message' : 'Filter and ordered mirrors!',
+		'status' : 'complete'
+	})
+
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
 		if '_install_step' in data and data['_install_step'] == 'mirrors':
@@ -106,7 +114,7 @@ class parser():
 					storage['mirror_region'] = data['mirrors']['region']
 					storage['mirror_specific'] = data['mirrors']['specific']
 
-					spawn(client, archinstall.filter_mirrors_by_country_list, countries=storage['mirror_region'], dependency='formatting')
+					spawn(client, archinstall.filter_mirrors_by_country_list, callback=notify_mirrors_complete, countries=storage['mirror_region'], dependency='formatting')
 
 					yield {
 						'status' : 'success',
