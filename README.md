@@ -7,7 +7,7 @@ See trouble-shooting a bit further down.
 
 # Demo / Screenshot
 
-[A video demonstration](https://youtu.be/P11v3C-nhnw)
+[A video demonstration](https://youtu.be/btdCE-u5n8U)
 ![screenshot](screenshot.png)
 
 # Pre-built Live ISO:
