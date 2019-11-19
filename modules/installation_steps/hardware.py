@@ -137,7 +137,7 @@ class parser():
 				if not storage['SAFETY_LOCK']:
 					archinstall.cache_diskpw_on_disk()
 					archinstall.close_disks()
-					fmt = spawn(client, archinstall.format_disk, drive='drive', start='start', end='size')
+					fmt = spawn(client, archinstall.format_disk, debug=True, drive='drive', start='start', end='size')
 					refresh = spawn(client, archinstall.refresh_partition_list, drive='drive', dependency=fmt)
 					mkfs = spawn(client, archinstall.mkfs_fat32, drive='drive', partition='1', dependency=refresh)
 					encrypt = spawn(client, archinstall.encrypt_partition, drive='drive', partition='2', keyfile='pwfile', dependency=mkfs)
