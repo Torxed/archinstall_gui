@@ -57,7 +57,7 @@ class _spawn(Thread):
 
 		print('--->', self.func, 'is now being called')
 		log(self.func, 'is being called.', level=4, origin='worker', function='run')
-		if self.start_callback: self.start_callback(self, *args, **kwargs)
+		if self.start_callback: self.start_callback(self, *self.args, **self.kwargs)
 		self.status = 'running'
 		self.data = self.func(*self.args, **self.kwargs)
 
