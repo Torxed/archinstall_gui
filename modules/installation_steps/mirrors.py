@@ -106,7 +106,7 @@ class parser():
 					storage['mirror_region'] = data['mirrors']['region']
 					storage['mirror_specific'] = data['mirrors']['specific']
 
-					spawn(client, archinstall.filter_mirrors_by_country, countries=storage['mirror_region'], dependency='formatting')
+					spawn(client, archinstall.filter_mirrors_by_country_list, countries=storage['mirror_region'], dependency='formatting')
 
 					yield {
 						'status' : 'success',
