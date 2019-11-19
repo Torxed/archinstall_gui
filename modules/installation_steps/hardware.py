@@ -152,9 +152,10 @@ class parser():
 				if not storage['SAFETY_LOCK']:
 					archinstall.cache_diskpw_on_disk()
 					archinstall.close_disks()
-					if not 'mirror_region' in storage or 'mirror_specific' in storage:
-						## TODO: add geoip guessing, and run filter_mirrors_by_country_list([GEOIP_GUESSED])
-						spawn(client, archinstall.re_rank_mirrors)
+					## TODO: Add this step before hardware, no neat way to check if this is set mid-initilization.
+					#if not 'mirror_region' in storage or 'mirror_specific' in storage:
+					#	## TODO: add geoip guessing, and run filter_mirrors_by_country_list([GEOIP_GUESSED])
+					#	spawn(client, archinstall.re_rank_mirrors)
 					fmt = spawn(client, archinstall.format_disk, drive='drive', start='start', end='size', start_callback=notify_partitioning_started)
 					refresh = spawn(client, archinstall.refresh_partition_list, drive='drive', dependency=fmt)
 					mkfs = spawn(client, archinstall.mkfs_fat32, drive='drive', partition='1', dependency=refresh)
