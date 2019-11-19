@@ -110,5 +110,5 @@ class parser():
 
 					yield {
 						'status' : 'success',
-						'next' : 'templates'
+						'next' : 'hardware'
 					}

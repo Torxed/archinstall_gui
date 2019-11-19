@@ -9,10 +9,10 @@ class parser():
 			yield {
 				'modules' : oDict({
 					'credentials' : {'required' : True, 'defaults' : {}},
-					'hardware' : {'required' : True, 'defaults' : {}},
 					'mirrors' : {'required' : False, 'defaults' : {}},
+					'hardware' : {'required' : True, 'defaults' : {}},
+					'base_os' : {'required' : False, 'defaults' : {}},
 					'templates' : {'required' : False, 'defaults' : {}},
-					'software' : {'required' : False, 'defaults' : {}},
 					'language' : {'required' : False, 'defaults' : {}}
 				})
 			}

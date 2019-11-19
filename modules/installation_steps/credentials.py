@@ -95,5 +95,5 @@ class parser():
 
 				yield {
 					'status' : 'success',
-					'next' : 'hardware'
+					'next' : 'mirrors'
 				}

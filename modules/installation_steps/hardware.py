@@ -87,14 +87,14 @@ def notify_partitioning_done(worker, *args, **kwargs):
 def notify_base_install_started(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
-		'source' : 'software',
-		'message' : 'Base operating system is installed.',
+		'source' : 'base_os',
+		'message' : 'Installing base operating system',
 		'status' : 'active'
 	})
 def notify_base_install_done(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
-		'source' : 'software',
+		'source' : 'base_os',
 		'message' : 'Base operating system is installed.',
 		'status' : 'active'
 	})
@@ -102,7 +102,7 @@ def notify_base_install_done(worker, *args, **kwargs):
 def notify_base_configuration(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
-		'source' : 'software',
+		'source' : 'base_os',
 		'message' : 'Base operating system has been configured.',
 		'status' : 'active'
 	})
@@ -110,8 +110,8 @@ def notify_base_configuration(worker, *args, **kwargs):
 def notify_bootloader_completion(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
-		'source' : 'software',
-		'message' : 'Bootloader has been installed and configured.',
+		'source' : 'base_os',
+		'message' : 'Bootloader installed. Machine is ready!',
 		'status' : 'complete'
 	})
 
@@ -156,7 +156,7 @@ class parser():
 					if not 'mirror_region' in storage or 'mirror_specific' in storage:
 						## TODO: add geoip guessing, and run filter_mirrors_by_country_list([GEOIP_GUESSED])
 						spawn(client, archinstall.re_rank_mirrors)
-						
+
 					fmt = spawn(client, archinstall.format_disk, drive='drive', start='start', end='size', start_callback=notify_partitioning_started)
 					refresh = spawn(client, archinstall.refresh_partition_list, drive='drive', dependency=fmt)
 					mkfs = spawn(client, archinstall.mkfs_fat32, drive='drive', partition='1', dependency=refresh)
@@ -174,5 +174,5 @@ class parser():
 
 				yield {
 					'status' : 'success',
-					'next' : 'mirrors'
+					'next' : 'base_os'
 				}
