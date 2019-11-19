@@ -114,7 +114,7 @@ class parser():
 					storage['mirror_region'] = data['mirrors']['region']
 					storage['mirror_specific'] = data['mirrors']['specific']
 
-					spawn(client, archinstall.filter_mirrors_by_country_list, callback=notify_mirrors_complete, countries=storage['mirror_region'], dependency='formatting')
+					spawn(client, archinstall.filter_mirrors_by_country_list, callback=notify_mirrors_complete, countries=storage['mirror_region'])#, dependency='formatting') # NOTE: This updates the live/local mirrorlist, which will be copied in the install steps later by pacstrap.
 
 					yield {
 						'status' : 'success',
