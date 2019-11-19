@@ -1,9 +1,9 @@
 # archinstall_gui
-Graphical Arch Linux installer.<br>
+Graphical [Arch Linux](https://wiki.archlinux.org/index.php/Arch_Linux) installer.<br>
 All **errors should be reported here**, and no where else.<br>
 See trouble-shooting a bit further down.
 
-> **Note**: If you're not familiar with the installation process, please have a look at the comprehensive [Installation Guide](https://wiki.archlinux.org/index.php/Installation_guide).
+> **Note**: If you're not familiar with Arch Linux or the installation process, please have a look at the comprehensive [Installation Guide](https://wiki.archlinux.org/index.php/Installation_guide). Arch Linux **does not** come default with a graphical desktop environment.
 
 # Demo / Screenshot
 
