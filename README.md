@@ -5,20 +5,14 @@ See trouble-shooting a bit further down.
 
 > **Note**: If you're not familiar with the installation process, please have a look at the comprehensive [Installation Guide](https://wiki.archlinux.org/index.php/Installation_guide).
 
-# Screenshot
+# Demo / Screenshot
 
+[A video demonstration](https://youtu.be/P11v3C-nhnw)
 ![screenshot](screenshot.png)
 
 # Pre-built Live ISO:
 
 A pre-built ISO from the steps below, can be found [here](https://hvornum.se/archiso/)
-
-# Troubleshooting
-
-In case of installation errors, check the "Install log",<br>
-And post the local copy of `/root/archinstall.log` here on github as an issue.
-
-> *note*: The `archinstall.log` might be elsewhere if you're running this as a standalone application to install from a already existing Arch Linux installation.
 
 # Build into a Arch ISO medium
 
@@ -54,3 +48,10 @@ This will auto-run the backend webservice that does all the actual work.<br>
 Then, on boot it will launch `X` with `chromium` in full-screen mode *(thanks to the `xinitrc` from the `INSTALL` folder of this repo)*.
 
 Now, do `sudo ./build.sh -v` and a finished ISO should pop out under `./out`.
+
+# Troubleshooting
+
+In case of installation errors, check the "Install log",<br>
+And post the local copy of `/root/archinstall.log` here on github as an issue.
+
+> *note*: The `archinstall.log` might be elsewhere if you're running this as a standalone application to install from a already existing Arch Linux installation.

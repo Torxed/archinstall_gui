@@ -13,8 +13,10 @@
 	--light-grey-darker: #D4E1E8;
 	--light-grey-border: #bcd;
 
-	--power-off: #F06060;
-	--power-on: #8CBEB2;
+	--complete: #8CBEB2;
+	--error: #F06060;
+	--active: #000000;
+	--yellow: #F6AA1C;
 }
 
 body {
@@ -44,7 +46,6 @@ body {
 }
 
 	.logo {
-		flex-grow: 1;
 		font-weight: bold;
 		font-size: 24px;
 		color: #FFFFFF;
@@ -54,6 +55,10 @@ body {
 		flex-grow: 1;
 		color: var(--links);
 		font-size: 12px;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+		text-align: center;
 	}
 
 	.logo > span {
@@ -146,10 +151,67 @@ body {
 	}
 
 	.entries {
+		position: relative;
+		overflow: hidden;
 		display: flex;
 		flex-direction: column;
 
 		flex-grow: 1;
+	}
+
+	.entry {
+		position: relative;
+		display: flex;
+		flex-direction: row;
+		overflow: hidden;
+	}
+
+	.entry > button {
+		flex-grow: 1;
+		border: 0px;
+		background: transparent;
+		color: var(--links);
+		text-align: left;
+		padding: 20px;
+		font-size: 16px;
+		font-weight: bold;
+	}
+
+	.entry > .activity {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+		transform: translateX(-100%);
+		transition: transform 0.3s ease;
+	}
+
+	.entry > .activity.complete {
+		transform: translateX(-90%);
+		background-color: var(--complete); /* TODO: transition this out as well */
+	}
+	.entry > .activity.error {
+		transform: translateX(-90%);
+		background-color: var(--error); /* TODO: transition this out as well */
+	}
+	.entry > .activity.active {
+		background: repeating-linear-gradient(45deg, #000000, #000000 20%, var(--yellow) 21%, var(--yellow) 40%);
+		animation-duration: 2s;
+		animation-name: changewidth;
+		animation-iteration-count: infinite;
+		animation-direction: normal;
+		background-size: 100% 50%;
+		height: 400%;
+	}
+
+	@keyframes changewidth {
+		from {
+			transform: translateX(-90%) translateY(-50%);
+		}
+
+		to {
+			transform: translateX(-90%) translateY(0%);
+		}
 	}
 
 	@-webkit-keyframes rotating /* Safari and Chrome */ {
@@ -212,11 +274,6 @@ body {
 			background-size: cover;
 			width: 140px;
 			height: 140px;
-		}
-
-		.entry {
-			display: flex;
-			flex-direction: row;
 		}
 
 		.buttons > button,
@@ -464,7 +521,7 @@ body {
 		}
 			.popup > .buttons > .Save {
 				flex: 1;
-				color: var(--power-on);
+				color: var(--complete);
 				border-right: 1px solid var(--blue);
 			}
 				.popup > .buttons > .Save:hover {
@@ -473,7 +530,7 @@ body {
 
 			.popup > .buttons > .OK {
 				flex: 1;
-				color: var(--power-on);
+				color: var(--complete);
 				border-right: 1px solid var(--blue);
 			}
 				.popup > .buttons > .OK:hover {
@@ -482,14 +539,14 @@ body {
 
 			.popup > .buttons > .Discard {
 				flex: 1;
-				color: var(--power-off);
+				color: var(--error);
 			}
 				.popup > .buttons > .Discard:hover {
 					font-weight: bold;
 				}
 			.popup > .buttons > .Cancel {
 				flex: 1;
-				color: var(--power-off);
+				color: var(--error);
 			}
 				.popup > .buttons > .Cancel:hover {
 					font-weight: bold;
@@ -608,7 +665,7 @@ body {
 	}
 
 	.input-form label.bad::after {
-		border-bottom: 3px solid var(--power-off);
+		border-bottom: 3px solid var(--error);
 	}
 
 .label-content {

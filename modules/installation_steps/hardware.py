@@ -68,36 +68,51 @@ socket.send({
 })
 
 """
+
+def notify_partitioning_started(worker, *args, **kwargs):
+	sockets[worker.client.sock.fileno()].send({
+		'type' : 'notification',
+		'source' : 'hardware',
+		'message' : 'Paritioning has started',
+		'status' : 'active'
+	})
 def notify_partitioning_done(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
 		'source' : 'hardware',
 		'message' : 'Paritioning is done',
-		'status' : 'done'
+		'status' : 'complete'
 	})
 
+def notify_base_install_started(worker, *args, **kwargs):
+	sockets[worker.client.sock.fileno()].send({
+		'type' : 'notification',
+		'source' : 'software',
+		'message' : 'Base operating system is installed.',
+		'status' : 'active'
+	})
 def notify_base_install_done(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
-		'source' : 'base_install',
+		'source' : 'software',
 		'message' : 'Base operating system is installed.',
-		'status' : 'done'
+		'status' : 'active'
 	})
 
 def notify_base_configuration(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
-		'source' : 'base_configuration',
+		'source' : 'software',
 		'message' : 'Base operating system has been configured.',
-		'status' : 'done'
+		'status' : 'active'
 	})
 
 def notify_bootloader_completion(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
-		'source' : 'bootloader_install',
+		'source' : 'software',
 		'message' : 'Bootloader has been installed and configured.',
-		'status' : 'done'
+		'status' : 'complete'
 	})
 
 class parser():
@@ -140,14 +155,14 @@ class parser():
 					if not 'mirror_region' in storage or 'mirror_specific' in storage:
 						## TODO: add geoip guessing, and run filter_mirrors_by_country_list([GEOIP_GUESSED])
 						spawn(client, archinstall.re_rank_mirrors)
-					fmt = spawn(client, archinstall.format_disk, drive='drive', start='start', end='size')
+					fmt = spawn(client, archinstall.format_disk, drive='drive', start='start', end='size', start_callback=notify_partitioning_started)
 					refresh = spawn(client, archinstall.refresh_partition_list, drive='drive', dependency=fmt)
 					mkfs = spawn(client, archinstall.mkfs_fat32, drive='drive', partition='1', dependency=refresh)
 					encrypt = spawn(client, archinstall.encrypt_partition, drive='drive', partition='2', keyfile='pwfile', dependency=mkfs)
 					mount_luksdev = spawn(client, archinstall.mount_luktsdev, drive='drive', partition='2', keyfile='pwfile', dependency=encrypt)
 					btrfs = spawn(client, archinstall.mkfs_btrfs, dependency=mount_luksdev)
 					progress['formatting'] = spawn(client, archinstall.mount_mountpoints, drive='drive', bootpartition='1', callback=notify_partitioning_done, dependency=btrfs)
-					progress['strap_in'] = spawn(client, archinstall.strap_in_base, callback=notify_base_install_done, dependency=progress['formatting'])
+					progress['strap_in'] = spawn(client, archinstall.strap_in_base, start_callback=notify_base_install_started, callback=notify_base_install_done, dependency=progress['formatting'])
 					progress['configure_base_system'] = spawn(client, archinstall.configure_base_system, callback=notify_base_configuration, dependency=progress['strap_in'])
 					progress['setup_bootloader'] = spawn(client, archinstall.setup_bootloader, callback=notify_bootloader_completion, dependency=progress['configure_base_system'])
 					# TODO: Call add_AUR_support()

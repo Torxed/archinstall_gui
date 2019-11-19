@@ -59,6 +59,14 @@ document.querySelector('#saveButton').addEventListener('click', function() {
 })
 """
 
+def notify_credentials_saved(fileno, *args, **kwargs):
+	sockets[fileno].send({
+		'type' : 'notification',
+		'source' : 'credentials',
+		'message' : 'Credentials saved.',
+		'status' : 'complete'
+	})
+
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
 		if '_install_step' in data and data['_install_step'] == 'credentials':
@@ -83,25 +91,9 @@ class parser():
 					archinstall.args['hostname'] = data['credentials']['hostname']
 
 				storage['credentials'] = data['credentials']
+				notify_credentials_saved(fileno)
+
 				yield {
 					'status' : 'success',
 					'next' : 'hardware'
 				}
-
-				"""
-				elif len(data['credentials']) == 1:
-					yield {
-						'status' : 'failed',
-						'message' : 'Can not set disk/root password after formatting has started.'
-					}
-				else:
-					for account in storage['credentials']:
-						if account == 'disk_password' and 'formatting' in progress: continue
-
-						print('Setting up account:', account)
-
-					yield {
-						'status' : 'success',
-						'next' : 'hardware'
-					}
-				"""

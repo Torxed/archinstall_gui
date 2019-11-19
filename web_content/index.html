@@ -40,6 +40,7 @@
 				Object.keys(data['modules']).forEach((module_name) => {
 					let entry = document.createElement('div');
 					let mod = document.createElement('button');
+					let activity = document.createElement('div');
 					entry.classList = 'entry';
 					mod.id = 'btn_'+module_name;
 					mod.innerHTML = module_name;
@@ -51,7 +52,9 @@
 							'_install_step' : module_name
 						})
 					})
+					activity.classList = 'activity';
 					entry.appendChild(mod);
+					entry.appendChild(activity);
 					entries.appendChild(entry);
 				})
 
@@ -106,35 +109,16 @@
 				}
 			}
 
-			/*function listHardware(data) {
-				console.log(data);
-				if(typeof data['drives'] !== 'undefined') {
-					Object.keys(data['drives']).forEach((drive) => {
-						drives[drive] = data['drives'][drive];
-					})
+			function notification(data) {
+				console.log('Notification:', data)
+				if (typeof data['source'] !== 'undefined' && typeof data['status'] !== 'undefined') {
+					let button = document.querySelector('#btn_'+data['source']);
+					button.parentNode.querySelector('.activity').classList = 'activity ' + data['status'];
 				}
 
-				if(typeof data['status'] !== 'undefined' && data['status'] == 'success')
-					document.querySelector('#btn_hardware').innerHTML = 'hardware';
-
-				if(typeof data['html'] !== 'undefined')
-					document.querySelector('#configuration').innerHTML = data['html'];
-
-				if(typeof data['javascript'] !== 'undefined') {
-					let script = document.querySelector('#script_hardware');
-					if(script)
-						script.remove();
-
-					script = document.createElement('script');
-					script.id = 'script_hardware';
-					script.innerHTML = data['javascript'];
-					document.head.appendChild(script);
-				}
-
-				if(typeof data['next'] !== 'undefined') {
-					socket.send({'_install_step' : data['next']});
-				}
-			}*/
+				if(typeof data['message'] !== 'undefined')
+					document.querySelector('.status').innerHTML = data['message']
+			}
 
 			function listMirrors(data) {
 				console.log(data);
@@ -166,6 +150,8 @@
 						})
 					else
 						resource_handlers[data['_modules']](data);
+				} else if (typeof data['type'] !== 'undefined' && data['type'] == "notification") {
+					notification(data);
 				} else {
 					console.log('Got unhandled data:', data)
 				}
