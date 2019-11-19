@@ -71,7 +71,7 @@ class parser():
 				## We got credentials to store, not just calling this module.
 				if 'disk_password' in data['credentials'] and not 'formating' in progress:
 					archinstall.args = archinstall.setup_args_defaults(archinstall.args) # Note: don't setup args unless disk password is present, since that might start formatting on drives and stuff
-					archinstall.args['password'] = storage['credentials']['disk_password']
+					archinstall.args['password'] = data['credentials']['disk_password']
 					print(json.dumps(archinstall.args, indent=4))
 				else:
 					yield {
@@ -80,7 +80,7 @@ class parser():
 					}
 
 				if 'hostname' in data['credentials']:
-					archinstall.args['hostname'] = storage['credentials']['hostname']
+					archinstall.args['hostname'] = data['credentials']['hostname']
 
 				storage['credentials'] = data['credentials']
 				yield {
