@@ -145,8 +145,8 @@ class parser():
 					btrfs = spawn(client, archinstall.mkfs_btrfs, dependency=mount_luksdev)
 					progress['formatting'] = spawn(client, archinstall.mount_mountpoints, drive='drive', bootpartition='1', callback=notify_partitioning_done, dependency=btrfs)
 					progress['strap_in'] = spawn(client, archinstall.strap_in_base, debug=True, callback=notify_base_install_done, dependency=progress['formatting'])
-					progress['configure_base_system'] = spawn(client, archinstall.configure_base_system, callback=notify_base_configuration, dependency=progress['strap_in'])
-					progress['setup_bootloader'] = spawn(client, archinstall.setup_bootloader, callback=notify_bootloader_completion, dependency=progress['configure_base_system'])
+					progress['configure_base_system'] = spawn(client, archinstall.configure_base_system, debug=True, callback=notify_base_configuration, dependency=progress['strap_in'])
+					progress['setup_bootloader'] = spawn(client, archinstall.setup_bootloader, debug=True, callback=notify_bootloader_completion, dependency=progress['configure_base_system'])
 					# TODO: Call add_AUR_support()
 
 				else:
