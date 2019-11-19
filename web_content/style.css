@@ -59,6 +59,7 @@ body {
 		align-items: center;
 		align-content: center;
 		text-align: center;
+		padding-top: 10px;
 	}
 
 	.logo > span {
