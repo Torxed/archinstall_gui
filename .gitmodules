@@ -12,3 +12,5 @@
 	url = https://github.com/Torxed/slimWebSocket.git
 [dependencies "slimHTTP"]
 	master = master
+[dependencies "archinstall"]
+	master = master
