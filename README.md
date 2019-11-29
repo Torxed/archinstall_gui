@@ -29,6 +29,7 @@ xorg-server
 xorg-xinit
 xorg-twm
 chromium
+which
 EOF
 # cat <<EOF >> ./airootfs/root/customize_airootfs.sh
 cd /root
