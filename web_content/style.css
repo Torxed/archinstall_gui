@@ -15,6 +15,7 @@
 
 	--complete: #8CBEB2;
 	--error: #F06060;
+	--ignored: #666666;
 	--active: #000000;
 	--yellow: #F6AA1C;
 }
@@ -194,6 +195,10 @@ body {
 	.entry > .activity.error {
 		transform: translateX(-90%);
 		background-color: var(--error); /* TODO: transition this out as well */
+	}
+	.entry > .activity.ignored {
+		transform: translateX(-90%);
+		background-color: var(--ignored); /* TODO: transition this out as well */
 	}
 	.entry > .activity.active {
 		background: repeating-linear-gradient(45deg, #000000, #000000 20%, var(--yellow) 21%, var(--yellow) 40%);

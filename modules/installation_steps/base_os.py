@@ -79,6 +79,6 @@ class parser():
 				else:
 					yield {
 							'status' : 'success',
-							'next' : 'language'
+							'next' : 'templates'
 						}
 
