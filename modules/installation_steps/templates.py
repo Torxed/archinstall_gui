@@ -84,6 +84,7 @@ def notify_template_started(worker, *args, **kwargs):
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
+		log(f'templates got: {json.dumps(data)}', level=4, origin='templates')
 		if '_install_step' in data and data['_install_step'] == 'templates':
 			if not 'templates' in data and not 'template' in data:
 				if not 'pacstrap' in progress:
