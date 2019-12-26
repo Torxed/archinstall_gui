@@ -74,6 +74,14 @@ def notify_template_installed(worker, *args, **kwargs):
 		'status' : 'done'
 	})
 
+def notify_template_started(worker, *args, **kwargs):
+	sockets[worker.client.sock.fileno()].send({
+		'type' : 'notification',
+		'source' : 'templates',
+		'message' : 'Template is being installed',
+		'status' : 'active'
+	})
+
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
 		if '_install_step' in data and data['_install_step'] == 'templates':
@@ -111,7 +119,7 @@ class parser():
 				archinstall.instructions = archinstall.get_instructions(data['template'])
 				archinstall.instructions = archinstall.merge_in_includes(archinstall.instructions)
 				archinstall.cleanup_args()
-				progress['install_template'] = spawn(client, archinstall.run_post_install_steps, callback=notify_template_installed, dependency=progress['configure_base_system'])
+				progress['install_template'] = spawn(client, archinstall.run_post_install_steps, start_callback=notify_template_started, callback=notify_template_installed, dependency=progress['configure_base_system'])
 
 				yield {
 						'status' : 'success',

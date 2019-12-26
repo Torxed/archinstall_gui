@@ -67,4 +67,5 @@ class _spawn(Thread):
 			log(self.func, 'did not exit clearly.', level=2, origin='worker', function='run')
 			self.status = 'failed'
 		elif self.callback:
+			log(self.func, f'has finished, calling callback {self.callback}.', level=4, origin='worker', function='run')
 			self.callback(self, *self.args, **self.kwargs)
