@@ -57,10 +57,8 @@ window.update_drives = (data) => {
 	}
 }
 
-if(typeof resource_handlers['hardware'] === 'undefined')
-	resource_handlers['hardware'] = [update_drives];
-else if(resource_handlers['hardware'].length == 1)
-	resource_handlers['hardware'].push(update_drives)
+if(!socket.has_subscription('hardware'))
+	socket.subscribe(update_drives);
 
 socket.send({
 	'_install_step' : 'hardware',

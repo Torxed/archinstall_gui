@@ -45,10 +45,8 @@ window.update_packages = (data) => {
 		document.querySelector('#software_list').value = data['packages']
 }
 
-if(typeof resource_handlers['base_os'] === 'undefined')
-	resource_handlers['base_os'] = [update_packages];
-else if(resource_handlers['base_os'].length == 1)
-	resource_handlers['base_os'].push(update_packages)
+if(!socket.has_subscription('base_os'))
+	socket.subscribe(update_packages);
 
 socket.send({'_install_step' : 'base_os', 'packages' : 'refresh'})
 

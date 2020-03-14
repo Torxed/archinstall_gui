@@ -57,10 +57,8 @@ window.update_templtes = (data) => {
 	}
 }
 
-if(typeof resource_handlers['templates'] === 'undefined')
-	resource_handlers['templates'] = [update_templtes];
-else if(resource_handlers['templates'].length == 1)
-	resource_handlers['templates'].push(update_templtes)
+if(!socket.has_subscription('templates'))
+	socket.subscribe(update_templtes);
 
 socket.send({'_install_step' : 'templates', 'templates' : 'refresh'})
 
