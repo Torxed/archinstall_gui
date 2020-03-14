@@ -158,6 +158,7 @@
 			window.onload = function() {
 				socket.subscribe('sysinfo', sysinfo)
 				socket.subscribe('listModules', listModules)
+				socket.subscribe('notification', notification)
 
 				socket.subscribe('credentials', listCredentials)
 				socket.subscribe('mirrors', genericStepLoader)
