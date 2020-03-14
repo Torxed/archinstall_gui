@@ -158,11 +158,13 @@
 			window.onload = function() {
 				socket.subscribe('sysinfo', sysinfo)
 				socket.subscribe('listModules', listModules)
+
 				socket.subscribe('credentials', listCredentials)
-				socket.subscribe('hardware', genericStepLoader)
 				socket.subscribe('mirrors', genericStepLoader)
+				socket.subscribe('hardware', genericStepLoader)
+				socket.subscribe('base_os', genericStepLoader)
 				socket.subscribe('templates', genericStepLoader)
-				socket.subscribe('software', genericStepLoader)
+				socket.subscribe('software', genericStepLoader)  //TODO: Old, not needed?
 				socket.subscribe('language', genericStepLoader)
 				socket.subscribe('install_log', genericStepLoader)
 
