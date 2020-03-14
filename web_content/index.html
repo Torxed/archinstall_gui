@@ -127,6 +127,9 @@
 
 				if(typeof data['message'] !== 'undefined')
 					document.querySelector('.status').innerHTML = data['message']
+
+				if(typeof data['next'] !== 'undefined')
+					socket.send({'_install_step' : data['next']});
 			}
 
 			function listMirrors(data) {
