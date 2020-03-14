@@ -57,7 +57,7 @@ window.update_drives = (data) => {
 	}
 }
 
-if(!socket.has_subscription('hardware'))
+if(socket.subscriptions('hardware') != 2)
 	socket.subscribe('hardware', update_drives);
 
 socket.send({
