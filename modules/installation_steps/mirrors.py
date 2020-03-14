@@ -57,6 +57,7 @@ window.refresh_mirrorlist = () => {
 }
 
 window.update_mirrorlist = (data) => {
+	console.log("Updating mirror cache");
 	if(typeof data['mirrorlist'] !== 'undefined') {
 		window.mirror_list = data['mirrorlist'];
 		window.refresh_mirrorlist();
@@ -68,6 +69,8 @@ window.update_mirrorlist = (data) => {
 
 if(socket.subscriptions('mirrors') != 2)
 	socket.subscribe(update_mirrorlist);
+else
+	console.log("Enough mirrors subscribers:", socket.subscriptions('mirrors'))
 
 socket.send({'_install_step' : 'mirrors', 'mirrors' : 'refresh'})
 
