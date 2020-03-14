@@ -33,7 +33,8 @@ document.querySelector('#save_templates').addEventListener('click', function() {
 document.querySelector('#skip_templates').addEventListener('click', function() {
 	notification({
 		'source' : 'templates',
-		'status' : 'ignored'
+		'status' : 'ignored',
+		'next' : 'language'
 	})
 })
 
@@ -69,7 +70,7 @@ def notify_template_installed(worker, *args, **kwargs):
 		'type' : 'notification',
 		'source' : 'templates',
 		'message' : 'Template has been installed.',
-		'status' : 'done'
+		'status' : 'complete'
 	})
 
 def notify_template_started(worker, *args, **kwargs):
