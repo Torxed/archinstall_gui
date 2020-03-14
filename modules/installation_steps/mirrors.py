@@ -66,7 +66,7 @@ window.update_mirrorlist = (data) => {
 /* Sweden */
 //Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch
 
-if(!socket.has_subscription('mirrors'))
+if(socket.subscriptions('mirrors') != 2)
 	socket.subscribe(update_mirrorlist);
 
 socket.send({'_install_step' : 'mirrors', 'mirrors' : 'refresh'})

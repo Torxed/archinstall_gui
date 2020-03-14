@@ -45,7 +45,7 @@ window.update_packages = (data) => {
 		document.querySelector('#software_list').value = data['packages']
 }
 
-if(!socket.has_subscription('base_os'))
+if(socket.subscriptions('base_os') != 2)
 	socket.subscribe(update_packages);
 
 socket.send({'_install_step' : 'base_os', 'packages' : 'refresh'})

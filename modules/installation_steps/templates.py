@@ -57,7 +57,7 @@ window.update_templtes = (data) => {
 	}
 }
 
-if(!socket.has_subscription('templates'))
+if(socket.subscriptions('templates') != 2)
 	socket.subscribe(update_templtes);
 
 socket.send({'_install_step' : 'templates', 'templates' : 'refresh'})
