@@ -46,7 +46,7 @@ window.update_packages = (data) => {
 }
 
 if(socket.subscriptions('base_os') != 2)
-	socket.subscribe(update_packages);
+	socket.subscribe('base_os', update_packages);
 
 socket.send({'_install_step' : 'base_os', 'packages' : 'refresh'})
 
