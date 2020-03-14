@@ -30,9 +30,11 @@ body {
 
 .balloon {
 	padding: 5px;
-	border: 1px solid var(--complete);
+	border: 1px solid #94be8c;
 	border-radius: 3px;
-	background-color: var(--light-grey-darker);
+	background-color: #d4e8d6;
+	padding-left: 20px;
+	padding-right: 20px;
 }
 
 .container {
@@ -68,6 +70,7 @@ body {
 		align-content: center;
 		text-align: center;
 		padding-top: 10px;
+		display: flex;
 	}
 
 	.logo > span {
