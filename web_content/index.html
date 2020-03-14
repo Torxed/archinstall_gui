@@ -142,53 +142,20 @@
 				}
 			}
 
-			function data_router(data) {
-				if(typeof resource_handlers[data['_modules']] !== 'undefined') {
-					if(typeof resource_handlers[data['_modules']] === 'object')
-						resource_handlers[data['_modules']].forEach((handler) => {
-							handler(data);
-						})
-					else
-						resource_handlers[data['_modules']](data);
-				} else if (typeof data['type'] !== 'undefined' && data['type'] == "notification") {
-					notification(data);
-				} else {
-					console.log('Got unhandled data:', data)
-				}
-			}
-
 			window.show_install_log = function() {
 				socket.send({'_install_step' : 'install_log'});
 			}
 
 			window.onload = function() {
-				resource_handlers['sysinfo'] = sysinfo
-				resource_handlers['listModules'] = listModules
-				resource_handlers['credentials'] = listCredentials
-				resource_handlers['hardware'] = [];
-				resource_handlers['hardware'].push(genericStepLoader);
-				resource_handlers['mirrors'] = [];
-				resource_handlers['mirrors'].push(genericStepLoader);
-				resource_handlers['templates'] = [];
-				resource_handlers['templates'].push(genericStepLoader);
-				resource_handlers['software'] = [];
-				resource_handlers['software'].push(genericStepLoader);
-				resource_handlers['language'] = [];
-				resource_handlers['language'].push(genericStepLoader);
-				resource_handlers['install_log'] = [];
-				resource_handlers['install_log'].push(genericStepLoader);
-
-				socket.socket.addEventListener('message', function (event) {
-					let data = event.data;
-					if(typeof data == "string") {
-						try {
-							data = JSON.parse(data);
-						} catch(err) {
-							//console.log(err);
-						}
-					}
-					data_router(data);
-				});
+				socket.subscribe('sysinfo', sysinfo)
+				socket.subscribe('listModules', listModules)
+				socket.subscribe('credentials', listCredentials)
+				socket.subscribe('hardware', genericStepLoader)
+				socket.subscribe('mirrors', genericStepLoader)
+				socket.subscribe('templates', genericStepLoader)
+				socket.subscribe('software', genericStepLoader)
+				socket.subscribe('language', genericStepLoader)
+				socket.subscribe('install_log', genericStepLoader)
 
 				socket.send({"_module" : "sysinfo"});
 				socket.send({"_module" : "listModules"});
