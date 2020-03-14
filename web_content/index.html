@@ -16,6 +16,8 @@
 			let hostname = null;
 			let mirror_list = {};
 
+			let initiated = false;
+
 			// Loading JavaScript from a cross-site resource is blocked.
 			// But there's nothing stopping us from downloading the script
 			// as a text-blob and placing it within the <script> </ script> tags,
@@ -59,6 +61,13 @@
 				})
 
 				modules.appendChild(entries);
+
+				if(!initiated) {
+					socket.send({
+						'_install_step' : Object.keys(data['modules'])[0]
+					})
+					initiated = true;
+				}
 			}
 
 			function genericStepLoader(data) {
