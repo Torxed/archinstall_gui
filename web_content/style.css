@@ -28,6 +28,13 @@ body {
 	font-family: sans-serif!important;
 }
 
+.balloon {
+	padding: 5px;
+	border: 1px solid var(--complete);
+	border-radius: 3px;
+	background-color: var(--light-grey-darker);
+}
+
 .container {
 	display: flex;
 	height: 100%;
