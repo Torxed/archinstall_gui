@@ -14,6 +14,7 @@ html = """
 
 	<div class="buttons bottom">
 		<button id="save_templates">Choose template</button>
+		<button id="skip_templates">Skip this step</button>
 	</div>
 </div>
 """
@@ -26,6 +27,13 @@ document.querySelector('#save_templates').addEventListener('click', function() {
 	socket.send({
 		'_install_step' : 'templates',
 		'template' : document.querySelector('#templatelist').value
+	})
+})
+
+document.querySelector('#skip_templates').addEventListener('click', function() {
+	notification({
+		'source' : 'templates',
+		'status' : 'ignored'
 	})
 })
 
@@ -61,13 +69,22 @@ socket.send({'_install_step' : 'templates', 'templates' : 'refresh'})
 def notify_template_installed(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
-		'source' : 'bootloader_install',
-		'message' : 'Bootloader has been installed and configured.',
+		'source' : 'templates',
+		'message' : 'Template has been installed.',
 		'status' : 'done'
+	})
+
+def notify_template_started(worker, *args, **kwargs):
+	sockets[worker.client.sock.fileno()].send({
+		'type' : 'notification',
+		'source' : 'templates',
+		'message' : 'Template is being installed',
+		'status' : 'active'
 	})
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
+		log(f'templates got: {json.dumps(data)}', level=4, origin='templates')
 		if '_install_step' in data and data['_install_step'] == 'templates':
 			if not 'templates' in data and not 'template' in data:
 				if not 'pacstrap' in progress:
@@ -100,7 +117,10 @@ class parser():
 					pass
 			elif 'template' in data:
 				
-				progress['install_template'] = spawn(client, archinstall.run_post_install_steps, callback=notify_template_installed, dependency=progress['configure_base_system'])
+				archinstall.instructions = archinstall.get_instructions(data['template'])
+				archinstall.instructions = archinstall.merge_in_includes(archinstall.instructions)
+				archinstall.cleanup_args()
+				progress['install_template'] = spawn(client, archinstall.run_post_install_steps, start_callback=notify_template_started, callback=notify_template_installed, dependency=progress['configure_base_system'])
 
 				yield {
 						'status' : 'success',
