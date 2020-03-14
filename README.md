@@ -12,7 +12,17 @@ See trouble-shooting a bit further down.
 
 # Pre-built Live ISO:
 
-A pre-built ISO from the steps below, can be found [here](https://hvornum.se/archiso/)
+A pre-built ISO from the steps below, can be found [here](https://hvornum.se/archiso/).
+Also pre-built graphical support for:
+
+ * VirtualBox
+ * kvm / qemu
+ * VMWare
+ * And most hardware that supports basic drivers such as:
+   * [mesa](https://www.archlinux.org/packages/?name=mesa)
+   * [xf86-video-fbdev](https://www.archlinux.org/packages/?name=xf86-video-fbdev)
+   * [xf86-video-vesa](https://www.archlinux.org/packages/?name=xf86-video-vesa)
+   * [xf86-video-vmware](https://www.archlinux.org/packages/?name=xf86-video-vmware)
 
 # Build into a Arch ISO medium
 
