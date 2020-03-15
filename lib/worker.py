@@ -59,7 +59,7 @@ class _spawn(Thread):
 
 		print('--->', self.func, 'is now being called')
 		log(self.func, 'is being called.', level=4, origin='worker', function='run')
-		if self.start_callback: self.start_callback(self, *self.args, **self.kwargs)
+		if self.start_callback: self.start_callback(*self.args, **self.kwargs)
 		self.status = 'running'
 		self.data = self.func(*self.args, **self.kwargs)
 
@@ -69,7 +69,7 @@ class _spawn(Thread):
 			log(self.func, 'did not exit clearly.', level=2, origin='worker', function='run')
 			self.status = 'failed'
 			if self.error_callback:
-				self.error_callback(self, *self.args, **self.kwargs)
+				self.error_callback(*self.args, **self.kwargs)
 		elif self.callback:
 			log(self.func, f'has finished, calling callback {self.callback}.', level=4, origin='worker', function='run')
-			self.callback(self, *self.args, **self.kwargs)
+			self.callback(*self.args, **self.kwargs)
