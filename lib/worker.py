@@ -3,7 +3,7 @@ from threading import Thread, enumerate as tenum
 from select import epoll, EPOLLIN, EPOLLHUP
 
 class _spawn(Thread):
-	def __init__(self, client, func, callback=None, start_callback=None, *args, **kwargs):
+	def __init__(self, client, func, callback=None, start_callback=None, error_callback=None, *args, **kwargs):
 		if not 'worker_id' in kwargs: kwargs['worker_id'] = gen_uid()
 		Thread.__init__(self)
 		self.func = func
@@ -11,6 +11,7 @@ class _spawn(Thread):
 		self.args = args
 		self.kwargs = kwargs
 		self.callback = callback
+		self.error_callback = error_callback
 		self.data = None
 		self.start_callback = start_callback
 		self.started = time.time()
@@ -66,6 +67,8 @@ class _spawn(Thread):
 		if self.data is None:
 			log(self.func, 'did not exit clearly.', level=2, origin='worker', function='run')
 			self.status = 'failed'
+			if self.error_callback:
+				self.error_callback(self, *self.args, **self.kwargs)
 		elif self.callback:
 			log(self.func, f'has finished, calling callback {self.callback}.', level=4, origin='worker', function='run')
 			self.callback(self, *self.args, **self.kwargs)
