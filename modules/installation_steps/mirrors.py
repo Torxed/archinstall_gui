@@ -30,11 +30,23 @@ html = """
 javascript = """
 
 document.querySelector('#save_mirrors').addEventListener('click', function() {
+	let mirrors = {};
+	let mirror_list = document.querySelector('#mirrorlist');
+	Array.from(mirror_list.options).forEach(function(option_element) {
+		let option_text = option_element.text;
+		let option_value = option_element.value;
+		let is_option_selected = option_element.selected;
+
+		if (is_option_selected) {
+			mirrors[option_value] = option_element.getAttribute('country');
+		}
+	});
+
 	socket.send({
 		'_install_step' : 'mirrors',
 		'mirrors' : {
 			'region' : document.querySelector('#country_code').value,
-			'specific' : document.querySelector('#mirrorlist').selectedOptions
+			'specific' : mirrors
 		}
 	})
 })
@@ -50,6 +62,7 @@ window.refresh_mirrorlist = () => {
 
 		let option = document.createElement('option');
 		option.value = mirrorlist_info['url'];
+		option.setAttribute('country', mirrorlist_info['country']);
 		option.innerHTML = mirrorlist_info['country'] + ' (' + mirrorlist_info['url'] + ')';
 
 		mirrorlist_dropdown.appendChild(option);
@@ -112,7 +125,12 @@ class parser():
 					storage['mirror_region'] = data['mirrors']['region']
 					storage['mirror_specific'] = data['mirrors']['specific']
 
-					spawn(client, archinstall.filter_mirrors_by_country_list, callback=notify_mirrors_complete, countries=storage['mirror_region'])#, dependency='formatting') # NOTE: This updates the live/local mirrorlist, which will be copied in the install steps later by pacstrap.
+					sync_mirrors = None
+					if storage['mirror_region']:
+						sync_mirrors = spawn(client, archinstall.filter_mirrors_by_country_list, callback=notify_mirrors_complete, countries=storage['mirror_region'])#, dependency='formatting') # NOTE: This updates the live/local mirrorlist, which will be copied in the install steps later by pacstrap.
+
+					if storage['mirror_specific']:
+						spawn(client, archinstall.add_specific_mirrors, callback=add_specific_mirrors, mirrors=storage['mirror_specific'], dependency=sync_mirrors)
 
 					yield {
 						'status' : 'success',
