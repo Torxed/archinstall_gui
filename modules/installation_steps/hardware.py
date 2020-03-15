@@ -124,7 +124,7 @@ def notify_bootloader_completion(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
 		'source' : 'base_os',
-		'message' : '<div class="balloon">Bootloader installed. Machine is ready!</div>',
+		'message' : '<div class="balloon">Installation complete, ready for <b onClick="reboot();">reboot!</b></div>',
 		'status' : 'complete'
 	})
 

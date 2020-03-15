@@ -94,6 +94,14 @@ def notify_mirrors_complete(worker, *args, **kwargs):
 		'status' : 'complete'
 	})
 
+def notify_mirror_updates(worker, *args, **kwargs):
+	sockets[worker.client.sock.fileno()].send({
+		'type' : 'notification',
+		'source' : 'mirrors',
+		'message' : 'Reorderings mirrors.',
+		'status' : 'active'
+	})
+
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
 		if '_install_step' in data and data['_install_step'] == 'mirrors':
@@ -127,14 +135,14 @@ class parser():
 
 					sync_mirrors = None
 					if storage['mirror_region']:
-						sync_mirrors = spawn(client, archinstall.filter_mirrors_by_country_list, callback=notify_mirrors_complete, countries=storage['mirror_region'])#, dependency='formatting') # NOTE: This updates the live/local mirrorlist, which will be copied in the install steps later by pacstrap.
+						sync_mirrors = spawn(client, archinstall.filter_mirrors_by_country_list, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, countries=storage['mirror_region'])#, dependency='formatting') # NOTE: This updates the live/local mirrorlist, which will be copied in the install steps later by pacstrap.
 
 					if storage['mirror_specific']:
 						if not storage['mirror_region']:
 							# Before adding specific mirrors, flush the default mirrors if we didn't supply a specific region as well.
 							# A region (SE) could for instance have been selected, then we won't flush that but simply add additional ones.
 							sync_mirrors = spawn(client, archinstall.flush_all_mirrors)
-						spawn(client, archinstall.add_specific_mirrors, callback=notify_mirrors_complete, mirrors=storage['mirror_specific'], dependency=sync_mirrors)
+						spawn(client, archinstall.add_specific_mirrors, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, mirrors=storage['mirror_specific'], dependency=sync_mirrors)
 
 					yield {
 						'status' : 'success',

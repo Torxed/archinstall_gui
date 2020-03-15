@@ -31,6 +31,12 @@
 				document.querySelector('#adderall_version').innerHTML = `installer ${data['sysinfo']['version']}`;
 			}
 
+			function reboot() {
+				socket.send({
+					'_module' : 'reboot'
+				})
+			}
+
 			function listModules(data) {
 				console.log('Listing modules:', data)
 				let modules = document.querySelector('#modules');
