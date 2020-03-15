@@ -10,6 +10,7 @@ class _spawn(Thread):
 		self.client = client
 		self.args = args
 		self.kwargs = kwargs
+		if not 'client' in self.kwargs: kwargs['client'] = client
 		self.callback = callback
 		self.error_callback = error_callback
 		self.data = None
