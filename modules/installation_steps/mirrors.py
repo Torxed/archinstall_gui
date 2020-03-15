@@ -134,7 +134,7 @@ class parser():
 							# Before adding specific mirrors, flush the default mirrors if we didn't supply a specific region as well.
 							# A region (SE) could for instance have been selected, then we won't flush that but simply add additional ones.
 							sync_mirrors = spawn(client, archinstall.flush_all_mirrors)
-						spawn(client, archinstall.add_specific_mirrors, callback=add_specific_mirrors, mirrors=storage['mirror_specific'], dependency=sync_mirrors)
+						spawn(client, archinstall.add_specific_mirrors, callback=notify_mirrors_complete, mirrors=storage['mirror_specific'], dependency=sync_mirrors)
 
 					yield {
 						'status' : 'success',
