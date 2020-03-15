@@ -28,6 +28,16 @@ body {
 	font-family: sans-serif!important;
 }
 
+.reboot {
+	color: var(--yellow);
+	text-decoration: underline;
+	cursor: pointer;
+	background: var(--light-grey-darker);
+	border: 1px solid var(--ignored);
+	padding: 1px;
+	border-radius: 2px;
+}
+
 .balloon {
 	padding: 5px;
 	border: 1px solid #94be8c;

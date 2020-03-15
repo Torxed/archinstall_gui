@@ -124,7 +124,15 @@ def notify_bootloader_completion(worker, *args, **kwargs):
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
 		'source' : 'base_os',
-		'message' : '<div class="balloon">Installation complete, ready for <b onClick="reboot();">reboot!</b></div>',
+		'message' : 'Bootloader installed successfully.',
+		'status' : 'active'
+	})
+
+def notify_root_pw(worker, *args, **kwargs):
+	sockets[worker.client.sock.fileno()].send({
+		'type' : 'notification',
+		'source' : 'base_os',
+		'message' : '<div class="balloon">Installation complete, click here to <b class="reboot" onClick="reboot();">reboot!</b></div>',
 		'status' : 'complete'
 	})
 
@@ -180,6 +188,7 @@ class parser():
 					progress['strap_in'] = spawn(client, archinstall.strap_in_base, start_callback=notify_base_install_started, callback=notify_base_install_done, dependency=progress['formatting'])
 					progress['configure_base_system'] = spawn(client, archinstall.configure_base_system, start_callback=notify_base_configuration_started, callback=notify_base_configuration, dependency=progress['strap_in'])
 					progress['setup_bootloader'] = spawn(client, archinstall.setup_bootloader, callback=notify_bootloader_completion, dependency=progress['configure_base_system'])
+					progress['set_root_pw'] = spawn(client, archinstall.set_password, callback=notify_root_pw, dependency=progress['setup_bootloader'], user='root', password=storage['credentials']['disk_password'])
 					# TODO: Call add_AUR_support()
 
 				else:
