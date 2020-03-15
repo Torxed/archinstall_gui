@@ -29,12 +29,14 @@ body {
 }
 
 .reboot {
-	color: var(--yellow);
+	color: var(--error);
 	text-decoration: underline;
 	cursor: pointer;
 	background: var(--light-grey-darker);
 	border: 1px solid var(--ignored);
-	padding: 1px;
+	padding: 3px;
+	padding-left: 8px;
+	padding-right: 8px;
 	border-radius: 2px;
 }
 

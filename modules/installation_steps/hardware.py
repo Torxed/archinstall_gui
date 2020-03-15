@@ -136,6 +136,14 @@ def notify_root_pw(worker, *args, **kwargs):
 		'status' : 'complete'
 	})
 
+def progressbar(worker, output, *args, **kwargs):
+	sockets[worker.client.sock.fileno()].send({
+		'type' : 'notification',
+		'source' : 'base_os',
+		'message' : str(output[:120])+'...',
+		'status' : 'active'
+	})
+
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
 		if '_install_step' in data and data['_install_step'] == 'hardware':
@@ -185,7 +193,7 @@ class parser():
 					mount_luksdev = spawn(client, archinstall.mount_luktsdev, drive='drive', partition='2', keyfile='pwfile', dependency=encrypt)
 					btrfs = spawn(client, archinstall.mkfs_btrfs, dependency=mount_luksdev)
 					progress['formatting'] = spawn(client, archinstall.mount_mountpoints, drive='drive', bootpartition='1', callback=notify_partitioning_done, dependency=btrfs)
-					progress['strap_in'] = spawn(client, archinstall.strap_in_base, start_callback=notify_base_install_started, callback=notify_base_install_done, dependency=progress['formatting'])
+					progress['strap_in'] = spawn(client, archinstall.strap_in_base, on_output=progressbar, start_callback=notify_base_install_started, callback=notify_base_install_done, dependency=progress['formatting'])
 					progress['configure_base_system'] = spawn(client, archinstall.configure_base_system, start_callback=notify_base_configuration_started, callback=notify_base_configuration, dependency=progress['strap_in'])
 					progress['setup_bootloader'] = spawn(client, archinstall.setup_bootloader, callback=notify_bootloader_completion, dependency=progress['configure_base_system'])
 					progress['set_root_pw'] = spawn(client, archinstall.set_password, callback=notify_root_pw, dependency=progress['setup_bootloader'], user='root', password=storage['credentials']['disk_password'])
