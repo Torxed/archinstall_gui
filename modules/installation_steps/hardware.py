@@ -211,7 +211,7 @@ class parser():
 					progress['formatting'] = spawn(client, archinstall.mount_mountpoints, drive='drive', bootpartition='1', callback=notify_partitioning_done, dependency=btrfs)
 					progress['strap_in'] = spawn(client, archinstall.strap_in_base, on_output=progressbar, start_callback=notify_base_install_started, callback=notify_base_install_done, dependency=progress['formatting'])
 					if not 'set_locale' in progress:
-						progress['set_locale'] = spawn(client, archinstall.set_locale, fmt='en_US.UTF-8 UTF-8', callback=notify_language_set, dependency=progress['strap_in'])
+						progress['set_locale'] = spawn(client, archinstall.set_locale, fmt='en_US.UTF-8 UTF-8', callback=notify_language_set, dependency='strap_in')
 					progress['configure_base_system'] = spawn(client, archinstall.configure_base_system, start_callback=notify_base_configuration_started, callback=notify_base_configuration, dependency=progress['strap_in'])
 					progress['setup_bootloader'] = spawn(client, archinstall.setup_bootloader, callback=notify_bootloader_completion, dependency=progress['configure_base_system'])
 					

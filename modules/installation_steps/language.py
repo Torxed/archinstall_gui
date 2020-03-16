@@ -55,7 +55,9 @@ class parser():
 				}
 			else:
 
-				progress['set_locale'] = spawn(client, archinstall.set_locale, fmt=data['language'], callback=notify_language_set, dependency='strap_in')
+				# TODO: Perhaps just change the language if the process hasn't yet finished.
+				if not 'set_locale' in progress:
+					progress['set_locale'] = spawn(client, archinstall.set_locale, fmt=data['language'], callback=notify_language_set, dependency='strap_in')
 
 				yield {
 					'status' : 'success',
