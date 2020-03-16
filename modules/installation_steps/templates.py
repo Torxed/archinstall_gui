@@ -1,4 +1,4 @@
-import json
+import json, time
 import urllib.request
 from os import walk
 from os.path import isdir, isfile, abspath
