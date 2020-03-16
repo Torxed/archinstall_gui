@@ -43,18 +43,25 @@ __builtins__.__dict__['progress'] = oDict({
 	'formatting' : None,
 })
 __builtins__.__dict__['sockets'] = safedict()
-__builtins__.__dict__['config'] = safedict({
-	'slimhttp': {
-		'web_root': abspath('./web_content'),
-		'index': 'index.html',
-		'vhosts': {
-			'archinstall.local': {
-				'web_root': abspath('./web_content'),
-				'index': 'index.html'
+
+if not (prereq := archinstall.prerequisit_check()) is True:
+	__builtins__.__dict__['config'] = safedict({
+		'slimhttp': {
+			'web_root': abspath('./web_content'),
+			'index': 'uefi_error.html',
+			'vhosts': {
 			}
 		}
-	}
-})
+	})
+else:
+	__builtins__.__dict__['config'] = safedict({
+		'slimhttp': {
+			'web_root': abspath('./web_content'),
+			'index': 'index.html',
+			'vhosts': {
+			}
+		}
+	})
 
 ## Import sub-modules after configuration setup.
 from dependencies.slimHTTP import slimhttpd

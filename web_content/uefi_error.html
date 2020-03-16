@@ -1,0 +1,55 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="./style.css">
+		<link rel="icon" type="image/png" href="./arch_linux_icon.png">
+		<title>Archinstall GUI</title>
+	</head>
+	<body>
+		<div class="container rows">
+			<div class="menu">
+				<div class="logo">
+					Arch<span>Linux</span><span class="version" id="adderall_version">installer {version}</span>
+				</div>
+				<div class="status">
+				</div>
+				<div class="menu_buttons">
+					<button class="active">Steps</button>
+					<button onClick="show_install_log();">Install log</button>
+				</div>
+			</div>
+			<div id="content" class="content">
+				<div class="configuration expand">
+					<div class="header" id="config_header"></div>
+					<div class="step flex_grow" id="configuration">
+						<h3 style="color: var(--error);">Archinstall only supports UEFI</h3>
+						Please reboot with UEFI enabled.<br>
+						<br>
+
+						<h4>VirtualBox</h4>
+						For <b>VirtualBox</b> this is done by:<br>
+						<ul>
+							<li>Machine settings</li>
+							<li>System</li>
+							<li>Tick/check "Enable EFI (special OSes only)"</li>
+						</ul>
+						<b>Important note:</b> ArchLinux (and others) boot extremely slow (2min boot time) when turning EFI on in VirtualBox.
+						<h4>VMWare</h4>
+						<ul>
+							<li>Virtual Machine settings</li>
+							<li>Advanced</li>
+							<li>Tick/check "Boot with EFI instead of BIOS"</li>
+						</ul>
+						Under MAC, this is under "VM Options" and them "Boot Options" and "Firmware".
+
+						<h4>KVM</h4>
+						For KVM, this is a bit more tricky.<br>
+						Most likely you'll use a GUI for this, and if you're using libvirt then <a href="https://fedoraproject.org/wiki/Using_UEFI_with_QEMU">virt-install</a> has an option for this.<br>
+						<br>
+						If you're using <b>quemu-system-x86_64</b> as a standalone, <a href="https://github.com/Torxed/Scripts/blob/master/bash/qemu.sh">Here's a script</a> that enables UEFI.
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
