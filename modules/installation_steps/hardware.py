@@ -129,6 +129,7 @@ def notify_bootloader_completion(worker, *args, **kwargs):
 	})
 
 def notify_root_pw(worker, *args, **kwargs):
+	log('Notify root_root_pw called. Sending reboot button!', level=3, origin='notify_root_pw')
 	sockets[worker.client.sock.fileno()].send({
 		'type' : 'notification',
 		'source' : 'base_os',
