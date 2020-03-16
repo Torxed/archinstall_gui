@@ -59,9 +59,11 @@ class _spawn(Thread):
 				self.ended = time.time()
 				self.status = 'aborted'
 				return None
+		else:
+			self.kwargs['dependency'] = None
 
-		print('--->', self.func, 'is now being called')
-		log(self.func, 'is being called.', level=4, origin='worker', function='run')
+		print('--->', self.func, f'is now being called after dependency {self.kwargs["dependency"]}')
+		log(self.func, f'is being called after dependency {self.kwargs["dependency"]}.', level=4, origin='worker', function='run')
 		if self.start_callback: self.start_callback(*self.args, **self.kwargs)
 		self.status = 'running'
 		self.data = self.func(*self.args, **self.kwargs)
