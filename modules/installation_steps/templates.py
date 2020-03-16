@@ -143,7 +143,8 @@ class parser():
 				archinstall.cleanup_args(input_redirect=request_input)
 				progress['install_template'] = spawn(client, archinstall.run_post_install_steps, dependency='setup_bootloader', on_output=progressbar, start_callback=notify_template_started, callback=notify_template_installed)
 				if 'set_root_pw' in progress:
-					log(f"Changing set_root_pw dependency to: {progress['install_template']}")
+					log(f" --- Changing set_root_pw dependency to: {progress['install_template']}")
+					log(f"Changing set_root_pw dependency to: {progress['install_template']}", level=3, origin='templates.parse')
 					progress['set_root_pw'].kwargs['dependency'] = progress['install_template']
 
 				yield {

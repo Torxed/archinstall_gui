@@ -215,13 +215,8 @@ class parser():
 						progress['set_locale'] = spawn(client, archinstall.set_locale, fmt='en_US.UTF-8 UTF-8', callback=notify_language_set, dependency='strap_in')
 					progress['configure_base_system'] = spawn(client, archinstall.configure_base_system, start_callback=notify_base_configuration_started, callback=notify_base_configuration, dependency=progress['strap_in'])
 					progress['setup_bootloader'] = spawn(client, archinstall.setup_bootloader, callback=notify_bootloader_completion, dependency=progress['configure_base_system'])
+					progress['set_root_pw'] = spawn(client, archinstall.set_password, callback=notify_root_pw, dependency=progress['setup_bootloader'], user='root', password=storage['credentials']['disk_password'])
 					
-					if 'install_template' in progress:
-						progress['set_root_pw'] = spawn(client, archinstall.set_password, callback=notify_root_pw, dependency='install_template', user='root', password=storage['credentials']['disk_password'])
-					else:
-						progress['set_root_pw'] = spawn(client, archinstall.set_password, callback=notify_root_pw, dependency=progress['setup_bootloader'], user='root', password=storage['credentials']['disk_password'])
-					# TODO: Call add_AUR_support()
-
 				else:
 					print('Emulating: Formatting drive:', storage['drive'])
 
