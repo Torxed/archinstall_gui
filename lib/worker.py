@@ -34,26 +34,34 @@ class _spawn(Thread):
 			return
 		
 		if 'dependency' in self.kwargs:
-			dependency = self.kwargs['dependency']
-			if type(dependency) == str:
-				print(f'{dependency} is waiting to be converted into a process.')
+			#dependency = self.kwargs['dependency']
+			if type(self.kwargs["dependency"]) == str:
+				print(f'{self.kwargs["dependency"]} is waiting to be converted into a process.')
 				# Dependency is a progress-string. Wait for it to show up.
-				while main and main.isAlive() and dependency not in progress or progress[dependency] is None:
+				while main and main.isAlive() and self.kwargs["dependency"] not in progress or progress[self.kwargs["dependency"]] is None:
 					time.sleep(0.25)
-				print(f'{dependency} is converted into {progress[dependency]}.')
-				dependency = progress[dependency]
+				print(f'{self.kwargs["dependency"]} is converted into {progress[self.kwargs["dependency"]]}.')
+				self.kwargs["dependency"] = progress[self.kwargs["dependency"]]
 
-			if type(dependency) == str:
-				print(f" [E] {self.func} waited for progress {dependency} which never showed up. Aborting.")
-				log(f"{self.func} waited for progress {dependency} which never showed up. Aborting.", level=2, origin='worker', function='run')
+			if type(self.kwargs["dependency"]) == str:
+				print(f" [E] {self.func} waited for progress {self.kwargs['dependency']} which never showed up. Aborting.")
+				log(f"{self.func} waited for progress {self.kwargs['dependency']} which never showed up. Aborting.", level=2, origin='worker', function='run')
 				self.ended = time.time()
 				self.status = 'aborted'
 				return None
 
-			while main and main.isAlive() and dependency.ended is None:
+			index = 0
+			while main and main.isAlive() and type(self.kwargs["dependency"]) is str or self.kwargs['dependency'].ended is None:
+				if type(self.kwargs["dependency"]) is str:
+					if self.kwargs["dependency"] in progress:
+						self.kwargs["dependency"] = progress[self.kwargs["dependency"]]
+					index += 1
+
+				if index > 10:
+					print('Endless loop in spawn()!', self.func, self.kwargs["dependency"])
 				time.sleep(0.25)
 
-			print(f'  *** Dependency {dependency} released for:', self.func)
+			print(f'  *** Dependency {self.kwargs["dependency"]} released for:', self.func)
 
 			if dependency.data is None or not main or not main.isAlive():
 				log('Dependency:', dependency.func, 'did not exit clearly. There for,', self.func, 'can not execute.', level=2, origin='worker', function='run')
@@ -84,9 +92,11 @@ class _spawn(Thread):
 			if self.error_callback:
 				self.error_callback(*self.args, **self.kwargs)
 		elif self.callback:
+			self.status = 'finished'
 			print(self.func, f'has finished, calling callback {self.callback}.')
 			log(self.func, f'has finished, calling callback {self.callback}.', level=4, origin='worker', function='run')
 			self.callback(*self.args, **self.kwargs)
 		else:
+			self.status = 'finished'
 			print(self.func, f'has finished with data: {self.data}')
 			log(self.func, f'has finished with data: {self.data}', level=4, origin='worker', function='run')
