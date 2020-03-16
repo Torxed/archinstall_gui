@@ -2,7 +2,6 @@ import json, time
 import urllib.request
 from os import walk
 from os.path import isdir, isfile, abspath
-from time import time
 
 html = """
 <div class="padded_content flex_grow flex column">
