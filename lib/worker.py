@@ -23,6 +23,7 @@ class _spawn(Thread):
 
 	def run(self):
 		main = None
+		self.name = str(self.func)
 		for t in tenum():
 			if t.name == 'MainThread':
 				main = t

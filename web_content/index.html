@@ -139,6 +139,8 @@
 
 				if(typeof data['next'] !== 'undefined')
 					socket.send({'_install_step' : data['next']});
+
+				return true;
 			}
 
 			function listMirrors(data) {
