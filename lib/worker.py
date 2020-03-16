@@ -44,6 +44,7 @@ class _spawn(Thread):
 				dependency = progress[dependency]
 
 			if type(dependency) == str:
+				print(f" [E] {self.func} waited for progress {dependency} which never showed up. Aborting.")
 				log(f"{self.func} waited for progress {dependency} which never showed up. Aborting.", level=2, origin='worker', function='run')
 				self.ended = time.time()
 				self.status = 'aborted'
@@ -65,9 +66,10 @@ class _spawn(Thread):
 		print('--->', self.func, f'is now being called after dependency {self.kwargs["dependency"]}')
 		log(self.func, f'is being called after dependency {self.kwargs["dependency"]}.', level=4, origin='worker', function='run')
 		if self.kwargs["dependency"]:
-			print(self.status)
-			print(self.kwargs["dependency"].ended)
-			print(self.kwargs["dependency"].data)
+			print(self.kwargs["dependency"])
+			print(dependency.status)
+			print(dependency.ended)
+			print(dependency.data)
 
 		if self.start_callback: self.start_callback(*self.args, **self.kwargs)
 		self.status = 'running'
