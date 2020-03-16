@@ -35,9 +35,11 @@ class _spawn(Thread):
 		if 'dependency' in self.kwargs:
 			dependency = self.kwargs['dependency']
 			if type(dependency) == str:
+				print(f'{dependency} is waiting to be converted into a process.')
 				# Dependency is a progress-string. Wait for it to show up.
 				while main and main.isAlive() and dependency not in progress or progress[dependency] is None:
 					time.sleep(0.25)
+				print(f'{dependency} is converted into {progress[dependency]}.')
 				dependency = progress[dependency]
 
 			if type(dependency) == str:
@@ -49,7 +51,7 @@ class _spawn(Thread):
 			while main and main.isAlive() and dependency.ended is None:
 				time.sleep(0.25)
 
-			print('  *** Dependency released for:', self.func)
+			print(f'  *** Dependency {dependency} released for:', self.func)
 
 			if dependency.data is None or not main or not main.isAlive():
 				log('Dependency:', dependency.func, 'did not exit clearly. There for,', self.func, 'can not execute.', level=2, origin='worker', function='run')
