@@ -36,6 +36,9 @@ archinstall_timers['logrefresh'] = setInterval(() => {
 	}
 }, 1000)
 
+window.logbox = document.querySelector('#logbox');
+window.logbox.scrollTop = window.logbox.scrollHeight;
+
 """
 
 class parser():
