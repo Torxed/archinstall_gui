@@ -71,12 +71,15 @@ class _spawn(Thread):
 		self.ended = time.time()
 		
 		if self.data is None:
+			print(self.func, 'did not exit clearly.')
 			log(self.func, 'did not exit clearly.', level=2, origin='worker', function='run')
 			self.status = 'failed'
 			if self.error_callback:
 				self.error_callback(*self.args, **self.kwargs)
 		elif self.callback:
+			print(self.func, f'has finished, calling callback {self.callback}.')
 			log(self.func, f'has finished, calling callback {self.callback}.', level=4, origin='worker', function='run')
 			self.callback(*self.args, **self.kwargs)
 		else:
+			print(self.func, f'has finished with data: {self.data}')
 			log(self.func, f'has finished with data: {self.data}', level=4, origin='worker', function='run')
