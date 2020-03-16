@@ -145,7 +145,7 @@ def progressbar(worker, output, *args, **kwargs):
 			sockets[worker.client.sock.fileno()].send({
 				'type' : 'notification',
 				'source' : 'base_os',
-				'message' : str(output[:120])+'...',
+				'message' : str(output[:120]),
 				'status' : 'active'
 			})
 			last_update = time.time()
