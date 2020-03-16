@@ -141,7 +141,7 @@ class parser():
 				archinstall.instructions = archinstall.get_instructions(data['template'])
 				archinstall.instructions = archinstall.merge_in_includes(archinstall.instructions)
 				archinstall.cleanup_args(input_redirect=request_input)
-				progress['install_template'] = spawn(client, archinstall.run_post_install_steps, on_output=progressbar, start_callback=notify_template_started, callback=notify_template_installed, dependency=progress['configure_base_system'])
+				progress['install_template'] = spawn(client, archinstall.run_post_install_steps, dependency='setup_bootloader', on_output=progressbar, start_callback=notify_template_started, callback=notify_template_installed)
 
 				yield {
 						'status' : 'success',
