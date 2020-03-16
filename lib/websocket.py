@@ -32,10 +32,10 @@ class pre_parser():
 			old_version, handle = import_result
 
 			# Just keep track if we're executing the new code or the old, for logging purposes only
-			if not old_version:
-				log(f'Calling {handle}.parser.parse(client, data, headers, fileno, addr, *args, **kwargs)', level=4, origin='pre_parser', function='parse')
-			else:
-				log(f'Calling old {handle}.parser.parse(client, data, headers, fileno, addr, *args, **kwargs)', level=3, origin='pre_parser', function='parse')
+			#if not old_version:
+			#	log(f'Calling {handle}.parser.parse(client, data, headers, fileno, addr, *args, **kwargs)', level=4, origin='pre_parser', function='parse')
+			#else:
+			#	log(f'Calling old {handle}.parser.parse(client, data, headers, fileno, addr, *args, **kwargs)', level=3, origin='pre_parser', function='parse')
 
 			try:
 				response = modules[module_path].parser.parse(f'modules', client, data, headers, fileno, addr, *args, **kwargs)

@@ -94,7 +94,7 @@ def _importer(path):
 			log(f'Failed to load API module ({e}): {path}', level=2, origin='importer')
 			return None
 	else:
-		log(f'Reloading API module: {path}', level=4, origin='importer')
+		#log(f'Reloading API module: {path}', level=4, origin='importer')
 		#for key in sys.modules:
 		#	print(key, '=', sys.modules[key])
 		try:
@@ -106,5 +106,5 @@ def _importer(path):
 			#importlib.reload(modules[path])
 		except SyntaxError as e:
 			old_version = True
-			log(f'Failed to reload API module ({e}): {path}', level=2, origin='importer')
+			#log(f'Failed to reload API module ({e}): {path}', level=2, origin='importer')
 	return old_version, modules[f'{path}']
