@@ -95,7 +95,7 @@ def progressbar(worker, output, *args, **kwargs):
 			output = output.decode('UTF-8').strip()
 			sockets[worker.client.sock.fileno()].send({
 				'type' : 'notification',
-				'source' : 'base_os',
+				'source' : 'templates',
 				'message' : str(output[:120]),
 				'status' : 'active'
 			})
