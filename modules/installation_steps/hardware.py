@@ -152,6 +152,14 @@ def progressbar(worker, output, *args, **kwargs):
 		except:
 			pass
 
+def notify_language_set(worker, *args, **kwargs):
+	sockets[worker.client.sock.fileno()].send({
+		'type' : 'notification',
+		'source' : 'language',
+		'message' : 'Language has been configured.',
+		'status' : 'complete'
+	})
+
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
 		if '_install_step' in data and data['_install_step'] == 'hardware':
