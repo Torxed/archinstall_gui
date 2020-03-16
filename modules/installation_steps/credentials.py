@@ -4,7 +4,7 @@ from os.path import isdir, isfile
 html = """
 <div class="padded_content flex_grow flex column">
 	<h3>Credentials</h3>
-	<span>Here you'll configure a disk password, which will also be your initial root password. Any additional users can be set up here as well any time during the installation process. Simply come back here at any time to add or remove users.</span>
+	<span>Here you'll configure a disk password, which <b>will also be your initial root password</b>.<br>Any additional users can be set up here as well any time during the installation process.<br>Simply come back here at any time to add or remove users.</span>
 	<div class="form-area" id="form-area">
 		<div class="input-form" id="input-form">
 			<input type="password" id="disk_password" required autocomplete="off" />
@@ -13,6 +13,34 @@ html = """
 			</label>
 		</div>
 	</div>
+	
+	<h3>Create one additional user</h3>
+	<div class="form-area" id="form-area">
+		<div class="input-form" id="input-form">
+			<input type="text" id="username" required autocomplete="off" />
+			<label class="label">
+				<span class="label-content">Username:</span>
+			</label>
+		</div>
+	</div>
+	<div class="form-area" id="form-area">
+		<div class="input-form" id="input-form">
+			<input type="password" id="password" required autocomplete="off" />
+			<label class="label">
+				<span class="label-content">Users password</span>
+			</label>
+		</div>
+	</div>
+	<div class="form-area" id="form-area">
+		<div class="input-form" id="input-form">
+			<input type="text" id="groups" required autocomplete="off" />
+			<label class="label">
+				<span class="label-content">User groups <i>(space separated)</i></span>
+			</label>
+		</div>
+	</div>
+	
+	<h3>Add a machine hostname</h3>
 	<div class="form-area" id="form-area">
 		<div class="input-form" id="input-form">
 			<input type="text" id="hostname" required autocomplete="off" />
@@ -53,6 +81,9 @@ document.querySelector('#saveButton').addEventListener('click', function() {
 		'_install_step' : 'credentials',
 		'credentials' : {
 			'disk_password' : disk_password,
+			'username' : document.querySelector('#username').value,
+			'password' : document.querySelector('#password').value,
+			'groups' : document.querySelector('#groups').value,
 			'hostname' : hostname
 		}
 	})
@@ -89,6 +120,9 @@ class parser():
 
 				if 'hostname' in data['credentials']:
 					archinstall.args['hostname'] = data['credentials']['hostname']
+
+				if data['username']:
+					archinstall.create_user(data['username'], data['password'], data['groups'].split(' '))
 
 				storage['credentials'] = data['credentials']
 				notify_credentials_saved(fileno)
