@@ -121,8 +121,8 @@ class parser():
 				if 'hostname' in data['credentials']:
 					archinstall.args['hostname'] = data['credentials']['hostname']
 
-				if data['username']:
-					archinstall.create_user(data['username'], data['password'], data['groups'].split(' '))
+				if 'username' in data['credentials'] and data['credentials']['username']:
+					archinstall.create_user(data['credentials']['username'], data['credentials']['password'], data['credentials']['groups'].split(' '))
 
 				storage['credentials'] = data['credentials']
 				notify_credentials_saved(fileno)
