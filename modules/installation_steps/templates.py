@@ -146,6 +146,8 @@ class parser():
 					log(f" --- Changing set_root_pw dependency to: {progress['install_template']}")
 					log(f"Changing set_root_pw dependency to: {progress['install_template']}", level=3, origin='templates.parse')
 					progress['set_root_pw'].kwargs['dependency'] = progress['install_template']
+				else:
+					print('--- No set_root_pw when running templates')
 
 				yield {
 						'status' : 'success',
