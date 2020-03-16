@@ -216,7 +216,7 @@ class parser():
 					progress['setup_bootloader'] = spawn(client, archinstall.setup_bootloader, callback=notify_bootloader_completion, dependency=progress['configure_base_system'])
 					
 					if 'install_template' in progress:
-						progress['set_root_pw'] = spawn(client, archinstall.set_password, callback=notify_root_pw, dependency=progress['install_template'], user='root', password=storage['credentials']['disk_password'])
+						progress['set_root_pw'] = spawn(client, archinstall.set_password, callback=notify_root_pw, dependency='install_template', user='root', password=storage['credentials']['disk_password'])
 					else:
 						progress['set_root_pw'] = spawn(client, archinstall.set_password, callback=notify_root_pw, dependency=progress['setup_bootloader'], user='root', password=storage['credentials']['disk_password'])
 					# TODO: Call add_AUR_support()
