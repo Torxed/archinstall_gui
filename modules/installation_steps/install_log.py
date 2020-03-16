@@ -34,7 +34,7 @@ archinstall_timers['logrefresh'] = setInterval(() => {
 	} else {
 		show_install_log();
 	}
-}, 1000)
+}, 200)
 
 window.logbox = document.querySelector('#logbox');
 window.logbox.scrollTop = window.logbox.scrollHeight;
