@@ -138,6 +138,7 @@ def notify_root_pw(worker, *args, **kwargs):
 
 last_update = time.time() # We generally don't need this since we're pushing through localhost. But just to not spam he UI.
 def progressbar(worker, output, *args, **kwargs):
+	global last_update
 	if len(output.strip()) and time.time() - last_update > 0.5:
 		try:
 			output = output.decode('UTF-8').strip()
