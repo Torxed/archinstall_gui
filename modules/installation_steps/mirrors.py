@@ -120,6 +120,7 @@ class parser():
 					## https://www.archlinux.org/mirrors/status/json/
 					## https://www.archlinux.org/mirrorlist/?country=SE&protocol=https&use_mirror_status=on
 					if not 'mirrors' in storage or time() - storage['mirrors']['last_check'] > storage['mirrors']['check_frequency']:
+						log(f'Getting latest mirrors from archlinux.org', level=4, origin='api.mirrors')
 						with urllib.request.urlopen('https://www.archlinux.org/mirrors/status/json/') as url:
 							json_data = json.loads(url.read().decode())
 							storage['mirrors'] = json_data
@@ -132,6 +133,7 @@ class parser():
 				elif type(data['mirrors']) == dict:
 					storage['mirror_region'] = data['mirrors']['region']
 					storage['mirror_specific'] = data['mirrors']['specific']
+					log(f"Storing selected mirrors. Region: {storage['mirror_region']}, Specifics: {storage['mirror_specific']}", level=4, origin='api.mirrors')
 
 					sync_mirrors = None
 					if storage['mirror_region']:
