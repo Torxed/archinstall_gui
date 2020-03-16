@@ -54,5 +54,7 @@ class pre_parser():
 							'_modules' : loaded_module
 						}
 			except BaseException as e:
-				log(f'Module error: {e}', level=2, origin='pre_parser', function='parse')
-				log(traceback.print_exc(), level=2, origin='pre_parser', function='parse')
+				exc_type, exc_obj, exc_tb = sys.exc_info()
+			    fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+				log(f'Module error in {fname}@{exc_tb.tb_lineno}: {e} ', level=2, origin='pre_parser', function='parse')
+				log(traceback.format_exc(), level=2, origin='pre_parser', function='parse')
