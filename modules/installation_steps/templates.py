@@ -81,6 +81,13 @@ def notify_template_started(worker, *args, **kwargs):
 		'status' : 'active'
 	})
 
+def request_input(key, *args, **kwargs):
+	if key in storage['credentials']:
+		return storage['credentials'][key]
+	elif key in storage:
+		return storage[key]
+	return None
+
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
 		log(f'templates got: {json.dumps(data)}', level=4, origin='templates')
@@ -118,7 +125,7 @@ class parser():
 				
 				archinstall.instructions = archinstall.get_instructions(data['template'])
 				archinstall.instructions = archinstall.merge_in_includes(archinstall.instructions)
-				archinstall.cleanup_args()
+				archinstall.cleanup_args(input_redirect=request_input)
 				progress['install_template'] = spawn(client, archinstall.run_post_install_steps, start_callback=notify_template_started, callback=notify_template_installed, dependency=progress['configure_base_system'])
 
 				yield {
