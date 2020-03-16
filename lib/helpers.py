@@ -79,7 +79,7 @@ def _importer(path):
 	if path not in modules:
 		## https://justus.science/blog/2015/04/19/sys.modules-is-dangerous.html
 		try:
-			log(f'Loading API module: {path}', level=4, origin='importer')
+			#log(f'Loading API module: {path}', level=4, origin='importer')
 			#importlib.machinery.SOURCE_SUFFIXES.append('') # empty string to allow any file
 			spec = importlib.util.spec_from_file_location(path, path)
 			if not spec:
