@@ -1,4 +1,4 @@
-import json
+import json, time
 from os.path import isdir, isfile
 
 html = """
@@ -136,13 +136,20 @@ def notify_root_pw(worker, *args, **kwargs):
 		'status' : 'complete'
 	})
 
+last_update = time.time() # We generally don't need this since we're pushing through localhost. But just to not spam he UI.
 def progressbar(worker, output, *args, **kwargs):
-	sockets[worker.client.sock.fileno()].send({
-		'type' : 'notification',
-		'source' : 'base_os',
-		'message' : str(output[:120])+'...',
-		'status' : 'active'
-	})
+	if len(output.strip()) and time.time() - last_update > 0.5:
+		try:
+			output = output.decode('UTF-8').strip()
+			sockets[worker.client.sock.fileno()].send({
+				'type' : 'notification',
+				'source' : 'base_os',
+				'message' : str(output[:120])+'...',
+				'status' : 'active'
+			})
+			last_update = time.time()
+		except:
+			pass
 
 class parser():
 	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
