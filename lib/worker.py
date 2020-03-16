@@ -73,3 +73,5 @@ class _spawn(Thread):
 		elif self.callback:
 			log(self.func, f'has finished, calling callback {self.callback}.', level=4, origin='worker', function='run')
 			self.callback(*self.args, **self.kwargs)
+		else:
+			log(self.func, f'has finished with data: {self.data}', level=4, origin='worker', function='run')
