@@ -24,6 +24,18 @@ document.querySelector('#refresh_button').addEventListener('click', function() {
 	show_install_log();
 })
 
+if(typeof archinstall_timers['logrefresh'] !== 'undefined')
+	clearInterval(archinstall_timers['logrefresh']);
+
+archinstall_timers['logrefresh'] = setInterval(() => {
+	let html_obj = document.querySelector('#logbox');
+	if(!html_obj) {
+		clearInterval(archinstall_timers['logrefresh']);
+	} else {
+		show_install_log();
+	}
+}, 1000)
+
 """
 
 class parser():
