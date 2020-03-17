@@ -65,6 +65,10 @@ Now, do `sudo ./build.sh -v` and a finished ISO should pop out under `./out`.
 # Troubleshooting
 
 In case of installation errors, check the "Install log",<br>
-And post the local copy of `/root/archinstall.log` here on github as an issue.
+And post the copy of `/root/archinstall.log` here on github as an issue *(Found on the live medium)*.
+
+Also doing `journalctl -a -n 500 -u archinstall_gui | less -S` might give useful indiciations on what went wrong, stack traces might end up in the journal output.
 
 > *note*: The `archinstall.log` might be elsewhere if you're running this as a standalone application to install from a already existing Arch Linux installation.
+
+Finally, just asking here for help is fine too. I'll support in any way I can.
