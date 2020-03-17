@@ -13,7 +13,7 @@ See trouble-shooting a bit further down.
 # Pre-built Live ISO:
 
 A pre-built ISO from the steps below, can be found [here](https://hvornum.se/archiso/).
-Also pre-built graphical support for:
+Which also come with pre-built graphical support for:
 
  * VirtualBox
  * kvm / qemu
