@@ -58,7 +58,7 @@ EOF
 This will auto-run the backend webservice that does all the actual work.<br>
 Then, on boot it will launch `X` with `chromium` in full-screen mode *(thanks to the `xinitrc` from the `INSTALL` folder of this repo)*.
 
-**Important note:** You'll also need to include a graphics driver *(not included in the steps above)*. Since this is a graphical installer, a working `xorg` environment is needed. For [VirtualBox](https://wiki.archlinux.org/index.php/VirtualBox#), this means [xf86-video-vmware](https://wiki.archlinux.org/index.php/VirtualBox#Install_the_Guest_Additions)
+**Important note:** You'll also need to include a graphics driver *(not included in the steps above)* in [packages.x86_64](https://wiki.archlinux.org/index.php/Archiso#Installing_packages). Since this is a graphical installer, a working `xorg` environment is needed. As an example, for [VirtualBox](https://wiki.archlinux.org/index.php/VirtualBox#), this means [xf86-video-vmware](https://wiki.archlinux.org/index.php/VirtualBox#Install_the_Guest_Additions) needs to be added into `packages.x86_64`.
 
 Now, do `sudo ./build.sh -v` and a finished ISO should pop out under `./out`.
 
