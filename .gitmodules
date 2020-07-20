@@ -8,7 +8,7 @@
 	path = dependencies/slimWS
 	url = https://github.com/Torxed/spiderWeb.git
 [submodule "web_content/slimWebSocket"]
-	path = web_content/slimWebSocket
+	path = gui_data/slimWebSocket
 	url = https://github.com/Torxed/slimWebSocket.git
 [dependencies "slimHTTP"]
 	master = master

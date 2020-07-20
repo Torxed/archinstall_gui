@@ -52,31 +52,30 @@ socket.send({'_install_step' : 'base_os', 'packages' : 'refresh'})
 
 """
 
-class parser():
-	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
-		if '_install_step' in data and data['_install_step'] == 'base_os':
-			if not 'packages' in data:
-				if not 'pacstrap' in progress:
-					additional_info = "Template steps won't be installed until after the base system has been installed.."
-				else:
-					additional_info = "The template will be installed as soon as you choose it."
-				
+def on_request(frame):
+	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/base_os':
+		if not 'packages' in frame.data:
+			if not 'pacstrap' in progress:
+				additional_info = "Template steps won't be installed until after the base system has been installed.."
+			else:
+				additional_info = "The template will be installed as soon as you choose it."
+			
+			yield {
+				'html' : html.format(additional_info=additional_info),
+				'javascript' : javascript
+			}
+		elif 'packages' in frame.data:
+			if frame.data['packages'] == 'refresh':
+				## https://github.com/Torxed/archinstall/tree/master/deployments
+				## document.querySelectorAll('.js-navigation-open') -> item.title
+				packagelist = ''
 				yield {
-					'html' : html.format(additional_info=additional_info),
-					'javascript' : javascript
+					'status' : 'success',
+					'packagelist' : packagelist
 				}
-			elif 'packages' in data:
-				if data['packages'] == 'refresh':
-					## https://github.com/Torxed/archinstall/tree/master/deployments
-					## document.querySelectorAll('.js-navigation-open') -> item.title
-					packagelist = ''
-					yield {
+			else:
+				yield {
 						'status' : 'success',
-						'packagelist' : packagelist
+						'next' : 'templates'
 					}
-				else:
-					yield {
-							'status' : 'success',
-							'next' : 'templates'
-						}
 

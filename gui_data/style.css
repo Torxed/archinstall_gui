@@ -145,12 +145,66 @@ body {
 	border: 1px solid var(--light-grey-border);
 }
 
+.note {
+	background-color: #e7f2fa;
+	margin-bottom: 20px;
+	margin-top: 20px;
+}
+
+.noteHeader {
+	background-color: #6ab0de;
+	color: #FFFFFF;
+	font-weight: bold;
+
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.warning {
+	background-color: #ffedcc;
+	margin-bottom: 20px;
+	margin-top: 20px;
+}
+
+.warningHeader {
+	background-color: #f0b37e;
+	color: #FFFFFF;
+	font-weight: bold;
+
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.inlineCode {
+	display: inline-block;
+	border: 1px solid #e1e4e5;
+	background-color: #edf0f2;
+	padding: 3px;
+	border-radius: 2px;
+}
+
+.noteBody {
+	padding: 10px;
+}
+
+.noteIcon {
+	width: 16px;
+	height: 16px;
+	background-image: url('./explamation_point.png');
+	background-size: 16px 16px;
+	margin: 10px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
 .configuration {
 	display: flex;
 	flex-direction: row;
 	margin: 10px;
 
-	background-color: var(--light-grey);
+	background-color: #fcfcfc;
 	border: 1px solid var(--light-grey-border);
 }
 
@@ -725,7 +779,7 @@ body {
 }
 
 .padded_content {
-	padding: 10px;
+	padding: 20px;
 }
 
 .flex_grow {

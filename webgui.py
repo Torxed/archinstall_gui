@@ -1,90 +1,29 @@
 #!/usr/bin/python
-
-import signal, time, json
-import shlex, pty, os
-import sys, traceback
-from os.path import splitext, basename, isdir, isfile, abspath
-from json import JSONEncoder, dumps, loads
-from collections import OrderedDict as oDict
-
-
-from lib.loghandler import LOG_LEVELS # log() gets imported automatically.
-from lib.helpers import _importer, _gen_uid, _safedict, _sys_command
-from lib.worker import _spawn
-from lib.websocket import pre_parser
-from dependencies.archinstall import archinstall as _archinstall
-
-## This protects any actions against the filesystem.
-#  (Useful for when debugging) #SafetyNotGuaranteed
-if isfile('./SAFETY_LOCK'):
-	SAFETY_LOCK = True
-else:
-	SAFETY_LOCK = False
+import signal
+import dependencies.slimHTTP as slimHTTP
+import dependencies.slimWS as slimWS
 
 def sig_handler(signal, frame):
 	http.close()
 	#https.close()
 	exit(0)
+
 signal.signal(signal.SIGINT, sig_handler)
 
-## Set up globals that can be used in this project (including sub modules)
-__builtins__.__dict__['LOG_LEVEL'] = LOG_LEVELS.INFO
-## Setup some global functions:
-#  (that can be accessed without importing)
-__builtins__.__dict__['importer'] = _importer
-__builtins__.__dict__['gen_uid'] = _gen_uid
-__builtins__.__dict__['safedict'] = _safedict
-__builtins__.__dict__['spawn'] = _spawn
-__builtins__.__dict__['sys_command'] = _sys_command
-__builtins__.__dict__['archinstall'] = _archinstall
-__builtins__.__dict__['modules'] = oDict()
-__builtins__.__dict__['storage'] = safedict({'SAFETY_LOCK' : SAFETY_LOCK})
-__builtins__.__dict__['progress'] = oDict({
-	'formatting' : None,
-})
-__builtins__.__dict__['sockets'] = safedict()
+websocket = slimWS.WebSocket()
+http = slimHTTP.server(slimHTTP.HTTP, host='127.0.0.1', port=80)
 
-if not (prereq := archinstall.prerequisit_check()) is True:
-	__builtins__.__dict__['config'] = safedict({
-		'slimhttp': {
-			'web_root': abspath('./web_content'),
-			'index': 'uefi_error.html',
-			'vhosts': {
-			}
-		}
-	})
-else:
-	__builtins__.__dict__['config'] = safedict({
-		'slimhttp': {
-			'web_root': abspath('./web_content'),
-			'index': 'index.html',
-			'vhosts': {
-			}
-		}
-	})
+@http.configuration
+def config(instance):
+	return {
+		'web_root' : './gui_data/',
+		'index' : 'index.html'
+	}
 
-## Import sub-modules after configuration setup.
-from dependencies.slimHTTP import slimhttpd
-from dependencies.spiderWeb import spiderWeb
+@http.on_upgrade
+def upgrade(request):
+	new_identity = websocket.WS_CLIENT_IDENTITY(request)
+	new_identity.upgrade(request) # Sends Upgrade request to client
+	return new_identity
 
-websocket = spiderWeb.upgrader({'default': pre_parser()})
-http = slimhttpd.http_serve(upgrades={b'websocket': websocket}, host='127.0.0.1', port=80)
-#https = slimhttpd.https_serve(upgrades={b'websocket': websocket}, host='127.0.0.1', port=443, cert='cert.pem', key='key.pem')
-
-while 1:
-	for handler in [http]:#, https]:
-		client = handler.accept()
-
-		#for fileno, client in handler.sockets.items():
-		for fileno, event in handler.poll().items():
-			if fileno in handler.sockets:  # If not, it's a main-socket-accept and that will occur next loop
-				sockets[fileno] = handler.sockets[fileno]
-				client = handler.sockets[fileno]
-				if client.recv():
-					response = client.parse()
-					if response:
-						try:
-							client.send(response)
-						except BrokenPipeError:
-							pass
-						client.close()
+http.run()

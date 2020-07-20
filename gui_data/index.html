@@ -30,6 +30,7 @@
 
 			function sysinfo(data) {
 				document.querySelector('#adderall_version').innerHTML = `installer ${data['sysinfo']['version']}`;
+				return true;
 			}
 
 			function reboot() {
@@ -46,19 +47,21 @@
 				entries.classList = 'entries';
 				modules.innerHTML = '';
 
-				Object.keys(data['modules']).forEach((module_name) => {
+				Object.keys(data['modules']).forEach((raw_module_name) => {
+					let module_name = raw_module_name.toLowerCase().replace(' ', '_');
+
 					let entry = document.createElement('div');
 					let mod = document.createElement('button');
 					let activity = document.createElement('div');
 					entry.classList = 'entry';
 					mod.id = 'btn_'+module_name;
-					mod.innerHTML = module_name;
-					if(data['modules'][module_name]['required'])
+					mod.innerHTML = raw_module_name;
+					if(data['modules'][raw_module_name]['required'])
 						mod.innerHTML += '<img src="./required.png" style="width: 12px; height: 12px; padding-left: 10px;">'
 					mod.setAttribute('module_name', module_name);
 					mod.addEventListener('click', function() {
 						socket.send({
-							'_install_step' : module_name
+							'_module' : 'installation_steps/'+module_name
 						})
 					})
 					activity.classList = 'activity';
@@ -71,7 +74,7 @@
 
 				if(!initiated) {
 					socket.send({
-						'_install_step' : Object.keys(data['modules'])[0]
+						'_module' : 'installation_steps/'+Object.keys(data['modules'])[0]
 					})
 					initiated = true;
 				}
@@ -82,8 +85,10 @@
 				if(typeof data['html'] !== 'undefined')
 					document.querySelector('#configuration').innerHTML = data['html'];
 
-				if(typeof data['status'] !== 'undefined' && data['status'] == 'success')
-					document.querySelector('#btn_'+data['_modules']).innerHTML = data['_modules'];
+				if(typeof data['status'] !== 'undefined' && data['status'] == 'success') {
+					let img = document.querySelector('#btn_'+data['_modules']).querySelector('img');
+					img.remove();
+				}
 
 				if(typeof data['javascript'] !== 'undefined') {
 					let script = document.querySelector('#script_'+data['_modules']);
@@ -97,13 +102,13 @@
 				}
 
 				if(typeof data['next'] !== 'undefined') {
-					socket.send({'_install_step' : data['next']});
+					socket.send({'_module' : 'installation_steps/'+data['next']});
 				}
 
 				return true;
 			}
 
-			function listCredentials(data) {
+/*			function listCredentials(data) {
 				console.log(data);
 				if(typeof data['html'] !== 'undefined')
 					document.querySelector('#configuration').innerHTML = data['html'];
@@ -123,9 +128,10 @@
 				}
 
 				if(typeof data['next'] !== 'undefined') {
-					socket.send({'_install_step' : data['next']});
+					socket.send({'_module' : 'installation_steps/'+data['next']});
 				}
 			}
+*/
 
 			function notification(data) {
 				console.log('Notification:', data)
@@ -138,7 +144,7 @@
 					document.querySelector('.status').innerHTML = data['message']
 
 				if(typeof data['next'] !== 'undefined')
-					socket.send({'_install_step' : data['next']});
+					socket.send({'_module' : 'installation_steps/'+data['next']});
 
 				return true;
 			}
@@ -161,12 +167,12 @@
 				}
 
 				if(typeof data['next'] !== 'undefined') {
-					socket.send({'_install_step' : data['next']});
+					socket.send({'_module' : 'installation_steps/'+data['next']});
 				}
 			}
 
 			window.show_install_log = function() {
-				socket.send({'_install_step' : 'install_log'});
+				socket.send({'_module' : 'installation_steps/install_log'});
 			}
 
 			window.onload = function() {
@@ -174,14 +180,14 @@
 				socket.subscribe('listModules', listModules)
 				socket.subscribe('notification', notification)
 
-				socket.subscribe('credentials', listCredentials)
-				socket.subscribe('mirrors', genericStepLoader)
-				socket.subscribe('hardware', genericStepLoader)
-				socket.subscribe('base_os', genericStepLoader)
-				socket.subscribe('templates', genericStepLoader)
-				socket.subscribe('software', genericStepLoader)  //TODO: Old, not needed?
-				socket.subscribe('language', genericStepLoader)
-				socket.subscribe('install_log', genericStepLoader)
+				socket.subscribe('harddrive', genericStepLoader)
+				socket.subscribe('encryption', genericStepLoader)
+			//	socket.subscribe('mirrors', genericStepLoader)
+			//	socket.subscribe('base_os', genericStepLoader)
+			//	socket.subscribe('templates', genericStepLoader)
+			//	socket.subscribe('software', genericStepLoader)  //TODO: Old, not needed?
+			//	socket.subscribe('language', genericStepLoader)
+			//	socket.subscribe('install_log', genericStepLoader)
 
 				socket.send({"_module" : "sysinfo"});
 				socket.send({"_module" : "listModules"});
