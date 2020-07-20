@@ -5,7 +5,7 @@
 	path = dependencies/slimHTTP
 	url = https://github.com/Torxed/slimHTTP.git
 [submodule "dependencies/spiderWeb"]
-	path = dependencies/spiderWeb
+	path = dependencies/slimWS
 	url = https://github.com/Torxed/spiderWeb.git
 [submodule "web_content/slimWebSocket"]
 	path = web_content/slimWebSocket
