@@ -205,10 +205,16 @@ def on_request(frame):
 				session.steps['mirrors'] = spawn(frame, update_mirrorlist, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, mirrors=session.information['mirrors'], dependency=region_update)
 
 			yield {
+				'status' : 'queued',
+				'_modules' : 'base_os' 
+			}
+			
+			yield {
 				'status' : 'success',
 				'next' : 'language', # base_os doesn't contain anything (yet)
 				'_modules' : 'mirrors' 
 			}
+
 
 #					storage['custom_mirror'] = {'name' : frame.data['mirrors']['mirror_name'], 'url' : frame.data['mirrors']['mirror_url']}
 #					log(f"Storing selected mirrors. Region: {storage['mirror_region']}, Specifics: {storage['mirror_specific']}", level=4, origin='api.mirrors')

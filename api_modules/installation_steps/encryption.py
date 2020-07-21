@@ -1,7 +1,9 @@
 import json
 from os.path import isdir, isfile
 
+from dependencies import archinstall
 from lib.worker import spawn
+from lib.helpers import install_base_os
 
 import session
 
@@ -27,7 +29,7 @@ if 'harddrive' in session.steps:
 
 		<div class="form-area" id="form-area">
 			<div class="input-form" id="input-form">
-				<input type="text" id="disk_password" required autocomplete="off" />
+				<input type="password" id="disk_password" required autocomplete="off" />
 				<label class="label">
 					<span class="label-content">Enter a disk password</span>
 				</label>
@@ -73,14 +75,23 @@ document.querySelector('#skipButton').addEventListener('click', function() {
 })
 """
 
-def strap_in_the_basics_with_encryption(frame, disk_password, drive, worker, hostname='Archnistall', *args, **kwargs):
-	frame.CLIENT_IDENTITY.send({
+def notify_partitioning_started(worker, *args, **kwargs):
+	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
 		'source' : 'harddrive',
 		'message' : f"Paritioning has started on <div class=\"inlineCode\">{session.information['drive']}</div>",
 		'status' : 'active'
 	})
+def notify_base_install_done(worker, *args, **kwargs):
+	worker.frame.CLIENT_IDENTITY.send({
+		'type' : 'notification',
+		'source' : 'base_os',
+		'message' : '<div class="balloon">Installation complete, click here to <b class="reboot" onClick="reboot();">reboot</b> when you\'re done</div>',
+		'sticky' : True,
+		'status' : 'complete'
+	})
 
+def strap_in_the_basics_with_encryption(frame, disk_password, drive, worker, hostname='Archnistall', *args, **kwargs):
 	with archinstall.Filesystem(drive, archinstall.GPT) as fs:
 		# Use partitioning helper to set up the disk partitions.
 		fs.use_entire_disk('luks2')
@@ -125,12 +136,14 @@ def strap_in_the_basics_with_encryption(frame, disk_password, drive, worker, hos
 				'status' : 'active'
 			})
 
-			with archinstall.Installer(drive.partition[1], boot_partition=drive.partition[0], hostname=hostname) as installation:
+			with archinstall.Installer(unlocked_device, boot_partition=drive.partition[0], hostname=hostname) as installation:
 				if installation.minimal_installation():
 					installation.add_bootloader()
 
 					session.steps['base_os'] = installation
 					session.steps['base_os_worker'] = worker
+
+	return True
 
 def on_request(frame):
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/encryption':
@@ -149,32 +162,9 @@ def on_request(frame):
 				'_modules' : 'encryption'
 			}
 		else:
-			print('Formatting with encryption on:', session.information['drive'])
-			#fmt = spawn(frame, archinstall.format_disk, drive='drive', start='start', end='size', start_callback=notify_partitioning_started)
-		"""
-		else:
-			## We got credentials to store, not just calling this module.
-			if 'disk_password' in data['credentials'] and not 'formating' in progress:
-				archinstall.args = archinstall.setup_args_defaults(archinstall.args) # Note: don't setup args unless disk password is present, since that might start formatting on drives and stuff
-				archinstall.args['password'] = data['credentials']['disk_password']
-				print(json.dumps(archinstall.args, indent=4))
-			else:
-				yield {
-					'status' : 'failed',
-					'message' : 'Can not set disk/root password after formatting has started.'
-				}
-
-			if 'hostname' in data['credentials']:
-				archinstall.args['hostname'] = data['credentials']['hostname']
-
-			if 'username' in data['credentials'] and data['credentials']['username']:
-				archinstall.create_user(data['credentials']['username'], data['credentials']['password'], data['credentials']['groups'].split(' '))
-
-			storage['credentials'] = data['credentials']
-			notify_credentials_saved(fileno)
-
+			session.steps['encryption'] = spawn(frame, strap_in_the_basics_with_encryption, disk_password=frame.data['disk_password'], drive=session.information['drive'], start_callback=notify_partitioning_started, callback=notify_base_install_done, dependency='mirrors')
 			yield {
-				'status' : 'success',
-				'next' : 'mirrors'
+				'status' : 'queued',
+				'next' : 'mirrors',
+				'_modules' : 'encryption' 
 			}
-		"""

@@ -56,7 +56,7 @@ html = """
 
 	<div class="buttons bottom">
 		<button id="install_packages">Install AUR packages</button>
-		<button id="skip_accounts">Skip this step</button>
+		<button id="skip_step">Skip this step</button>
 	</div>
 </div>
 """
@@ -78,11 +78,11 @@ document.querySelector('#install_packages').addEventListener('click', function()
 	document.querySelector('#package_list').disabled = false;
 })
 
-document.querySelector('#skip_accounts').addEventListener('click', function() {
+document.querySelector('#skip_step').addEventListener('click', function() {
 	notification({
 		'source' : 'aur_packages',
 		'status' : 'skipped',
-		'next' : 'install_log'
+		'next' : 'base_os'
 	})
 })
 
@@ -136,9 +136,8 @@ def on_request(frame):
 				'_modules' : 'aur_packages'
 			}
 		else:
-			print('Installing:', frame.data['packages'])
 			yield {
-				'status' : 'success',
+				'status' : 'queued',
 				'_modules' : 'aur_packages',
-				'next' : 'accounts'
+				'next' : 'base_os'
 			}
