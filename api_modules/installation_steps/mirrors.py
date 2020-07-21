@@ -3,49 +3,72 @@ import urllib.request
 from os.path import isdir, isfile
 from time import time
 
-html = """
-<div class="padded_content flex_grow flex column">
-	<h3>Choose mirror<i>(s) (Optional)</i></h3>
-	<span>Here's your chance to select region/specific mirrors.<br>{additional_info}</span>
+from dependencies import archinstall
+from lib.worker import spawn
+import session
 
-	<h3>Choose all mirrors from a region</h3>
-	<div class="form-area" id="form-area">
-		<div class="input-form" id="input-form">
-			<input type="text" id="country_code" required autocomplete="off" />
-			<label class="label">
-				<span class="label-content">Write country code(s), separate with , <i>(Ex: SE,UK = Sweden and United Kingdom)</i>.</span>
-			</label>
+if 'encryption' in session.steps:
+	html = f"""
+		<div class="padded_content flex_grow flex column">
+			<h3>Choose a mirror configuration <i>(Optional)</i></h3>
+			
+			<div class="warning">
+				<div class="warningHeader"><div class="noteIcon"></div><span>Warning</span></div>
+				<div class="noteBody">
+					After pressing any button at the bottom, <div class="inlineCode">{session.information['drive']}</div> will be completely erased <i>(wiped/formatted)</i>.<br>
+					<b>This action can not be undone!</b>
+				</div>
+			</div>
+
+			<div class="note">
+				<div class="noteHeader"><div class="noteIcon"></div><span>Note</span></div>
+				<div class="noteBody">
+					You can safely navigate in the left side menu without formatting any disks.
+				</div>
+			</div>
+
+			<h3>Available mirrors</h3>
+			<select id="mirrorlist" multiple>
+
+			</select>
+
+			<h3>Add a custom mirror</h3>
+			<div class="form-area" id="form-area">
+				<div class="input-form" id="input-form">
+					<input type="text" id="mirror_name" required autocomplete="off" />
+					<label class="label">
+						<span class="label-content">Name of mirror<i>(Ex: local_repo</i>.</span>
+					</label>
+				</div>
+			</div>
+			<div class="form-area" id="form-area">
+				<div class="input-form" id="input-form">
+					<input type="text" id="mirror_url" required autocomplete="off" />
+					<label class="label">
+						<span class="label-content">URL to custom mirror <i>(Ex: http://192.168.0.1/$repo/os/$arch)</i>.</span>
+					</label>
+				</div>
+			</div>
+
+			<h3>Or use all mirrors from a specified region</h3>
+			<div class="form-area" id="form-area">
+				<div class="input-form" id="input-form">
+					<input type="text" id="country_code" required autocomplete="off" />
+					<label class="label">
+						<span class="label-content">Write country code(s), separate with , <i>(Ex: SE,UK = Sweden and United Kingdom)</i>.</span>
+					</label>
+				</div>
+			</div>
+
+			<div class="buttons bottom">
+				<button id="save_mirrors">Use selected mirrors</button>
+				<button id="save_mirrors">Use Automatic detection</button>
+				<button id="save_mirrors">Skip and use default mirrors</button>
+			</div>
 		</div>
-	</div>
-
-	<h3>Add a custom mirror</h3>
-	<div class="form-area" id="form-area">
-		<div class="input-form" id="input-form">
-			<input type="text" id="mirror_name" required autocomplete="off" />
-			<label class="label">
-				<span class="label-content">Name of mirror<i>(Ex: local_repo</i>.</span>
-			</label>
-		</div>
-	</div>
-	<div class="form-area" id="form-area">
-		<div class="input-form" id="input-form">
-			<input type="text" id="mirror_url" required autocomplete="off" />
-			<label class="label">
-				<span class="label-content">URL to custom mirror <i>(Ex: http://192.168.0.1/$repo/os/$arch)</i>.</span>
-			</label>
-		</div>
-	</div>
-
-	<h3>Official active mirrors</h3>
-	<select id="mirrorlist" multiple>
-
-	</select>
-
-	<div class="buttons bottom">
-		<button id="save_mirrors">Save mirrorlist<i>(s)</i></button>
-	</div>
-</div>
-"""
+	"""
+else:
+	html = 'Previous step <i>(encryption)</i> not completed.'
 
 ## TODO:
 ## Needs to be loaded this way, since we can't inject JS into divs etc in the HTML above.
@@ -65,12 +88,10 @@ document.querySelector('#save_mirrors').addEventListener('click', function() {
 	});
 
 	socket.send({
-		'_install_step' : 'mirrors',
+		'_module' : 'installation_steps/mirrors',
 		'mirrors' : {
 			'region' : document.querySelector('#country_code').value,
-			'specific' : mirrors,
-			'mirror_name' : document.querySelector('#mirror_name').value,
-			'mirror_url' : document.querySelector('#mirror_url').value
+			'selected_mirrors' : mirrors
 		}
 	})
 })
@@ -103,15 +124,15 @@ window.update_mirrorlist = (data) => {
 /* Sweden */
 //Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch
 
-if(socket.subscriptions('mirrors') != 2)
-	socket.subscribe('mirrors', update_mirrorlist);
+if(socket.subscriptions('mirrorlist') != 2)
+	socket.subscribe('mirrorlist', update_mirrorlist);
 
-socket.send({'_install_step' : 'mirrors', 'mirrors' : 'refresh'})
+socket.send({'_module' : 'installation_steps/mirrors', 'mirrors' : 'refresh'})
 
 """
 
 def notify_mirrors_complete(worker, *args, **kwargs):
-	sockets[worker.client.sock.fileno()].send({
+	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
 		'source' : 'mirrors',
 		'message' : 'Filter and ordered mirrors!',
@@ -119,70 +140,94 @@ def notify_mirrors_complete(worker, *args, **kwargs):
 	})
 
 def notify_mirror_updates(worker, *args, **kwargs):
-	sockets[worker.client.sock.fileno()].send({
+	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
 		'source' : 'mirrors',
 		'message' : 'Reorderings mirrors.',
 		'status' : 'active'
 	})
 
-class parser():
-	def parse(path, client, data, headers, fileno, addr, *args, **kwargs):
-		if '_install_step' in data and data['_install_step'] == 'mirrors':
-			if not 'mirrors' in data:
-				if not 'pacstrap' in progress:
-					additional_info = "Installation of packages have not yet begun, so there's still time to change desired mirror for the installation process."
-				else:
-					additional_info = "Installation has begun, so these changes won't take affect until you're in the installed system."
-				
+def update_mirrorlist(frame, mirrors, worker, *args, **kwargs):
+	return archinstall.insert_mirrors(mirrors)
+
+def on_request(frame):
+	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/mirrors':
+		if not 'mirrors' in frame.data:
+			yield {
+				'html' : html,
+				'javascript' : javascript,
+				'_modules' : 'mirrors'
+			}
+
+		elif frame.data['mirrors'] == 'refresh':
+			## https://www.archlinux.org/mirrors/status/json/
+			## https://www.archlinux.org/mirrorlist/?country=SE&protocol=https&use_mirror_status=on
+			if not 'mirrors' in session.information or time() - session.information['mirrors']['last_check'] > session.information['mirrors']['check_frequency']:
+				frame.CLIENT_IDENTITY.server.log(f'Getting latest mirrors from archlinux.org')
+				with urllib.request.urlopen('https://www.archlinux.org/mirrors/status/json/') as url:
+					json_data = json.loads(url.read().decode())
+					session.information['mirrors'] = json_data
+					session.information['mirrors']['last_check'] = time() # Replace STRFTIME format with unix timestamp.
+
+			yield {
+				'mirrorlist' : session.information['mirrors'],
+				'_modules' : 'mirrors'
+			}
+		elif type(frame.data['mirrors']) == dict:
+			if ('selected_mirrors' not in frame.data['mirrors'] or 'region' not in frame.data['mirrors']) or len(frame.data['mirrors']['selected_mirrors']) == 0 and len(frame.data['mirrors']['region']) == 0:
 				yield {
-					'html' : html.format(additional_info=additional_info),
-					'javascript' : javascript
+					'_modules' : 'mirrors',
+					'status' : 'error',
+					'message' : 'Need to select at least one mirror or region <i>(or skip and use default mirrors)</i>'
 				}
-			else:
-				if data['mirrors'] == 'refresh':
-					## https://www.archlinux.org/mirrors/status/json/
-					## https://www.archlinux.org/mirrorlist/?country=SE&protocol=https&use_mirror_status=on
-					if not 'mirrors' in storage or time() - storage['mirrors']['last_check'] > storage['mirrors']['check_frequency']:
-						log(f'Getting latest mirrors from archlinux.org', level=4, origin='api.mirrors')
-						with urllib.request.urlopen('https://www.archlinux.org/mirrors/status/json/') as url:
-							json_data = json.loads(url.read().decode())
-							storage['mirrors'] = json_data
-							storage['mirrors']['last_check'] = time() # Replace STRFTIME format with unix timestamp.
 
-					yield {
-						'status' : 'success',
-						'mirrorlist' : storage['mirrors']
-					}
-				elif type(data['mirrors']) == dict:
-					storage['mirror_region'] = data['mirrors']['region']
-					storage['mirror_specific'] = data['mirrors']['specific']
-					storage['custom_mirror'] = {'name' : data['mirrors']['mirror_name'], 'url' : data['mirrors']['mirror_url']}
-					log(f"Storing selected mirrors. Region: {storage['mirror_region']}, Specifics: {storage['mirror_specific']}", level=4, origin='api.mirrors')
+			if 'region' in frame.data['mirrors']:
+				session.information['mirror_region'] = frame.data['mirrors']['region']
+			if 'selected_mirrors' in frame.data['mirrors']:
+				session.information['mirrors'] = frame.data['mirrors']['selected_mirrors']
 
-					sync_mirrors = None
-					specific_mirrors = None
-					if storage['mirror_region']:
-						sync_mirrors = spawn(client, archinstall.filter_mirrors_by_country_list, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, countries=storage['mirror_region'])#, dependency='formatting') # NOTE: This updates the live/local mirrorlist, which will be copied in the install steps later by pacstrap.
+			region_update = None
+			if 'mirror_region' in session.information and len(session.information['mirror_region']):
+				notification_done = notify_mirrors_complete
+				if 'mirrors' in session.information and len(session.information['mirrors']):
+					notification_done = None
+				region_update = spawn(frame, archinstall.filter_mirrors_by_region, start_callback=notify_mirror_updates, callback=notification_done, region=session.information['mirror_region'])
+			
+			if 'mirrors' in session.information and len(session.information['mirrors']):
+				session.steps['mirrors'] = spawn(frame, update_mirrorlist, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, mirrors=session.information['mirrors'], dependency=region_update)
 
-					if storage['mirror_specific']:
-						if not storage['mirror_region']:
-							# Before adding specific mirrors, flush the default mirrors if we didn't supply a specific region as well.
-							# A region (SE) could for instance have been selected, then we won't flush that but simply add additional ones.
-							sync_mirrors = spawn(client, archinstall.flush_all_mirrors)
-						specific_mirrors = spawn(client, archinstall.add_specific_mirrors, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, mirrors=storage['mirror_specific'], dependency=sync_mirrors)
+			yield {
+				'status' : 'success',
+				'next' : 'language', # base_os doesn't contain anything (yet)
+				'_modules' : 'mirrors' 
+			}
 
-					if storage['custom_mirror']['name'] and storage['custom_mirror']['url']:
-						if not storage['mirror_region'] and not storage['mirror_specific']:
-							sync_mirrors = spawn(client, archinstall.flush_all_mirrors)
-
-						dependency = sync_mirrors
-						if specific_mirrors:
-							dependency = specific_mirrors
-						spawn(client, archinstall.add_custom_mirror, **storage['custom_mirror'], start_callback=notify_mirror_updates, callback=notify_mirrors_complete, dependency=dependency)
-
-
-					yield {
-						'status' : 'success',
-						'next' : 'hardware'
-					}
+#					storage['custom_mirror'] = {'name' : frame.data['mirrors']['mirror_name'], 'url' : frame.data['mirrors']['mirror_url']}
+#					log(f"Storing selected mirrors. Region: {storage['mirror_region']}, Specifics: {storage['mirror_specific']}", level=4, origin='api.mirrors')
+#
+#					sync_mirrors = None
+#					specific_mirrors = None
+#					if storage['mirror_region']:
+#						sync_mirrors = spawn(client, archinstall.filter_mirrors_by_country_list, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, countries=storage['mirror_region'])#, dependency='formatting') # NOTE: This updates the live/local mirrorlist, which will be copied in the install steps later by pacstrap.
+#
+#					if storage['mirror_specific']:
+#						if not storage['mirror_region']:
+#							# Before adding specific mirrors, flush the default mirrors if we didn't supply a specific region as well.
+#							# A region (SE) could for instance have been selected, then we won't flush that but simply add additional ones.
+#							sync_mirrors = spawn(client, archinstall.flush_all_mirrors)
+#						specific_mirrors = spawn(client, archinstall.add_specific_mirrors, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, mirrors=storage['mirror_specific'], dependency=sync_mirrors)
+#
+#					if storage['custom_mirror']['name'] and storage['custom_mirror']['url']:
+#						if not storage['mirror_region'] and not storage['mirror_specific']:
+#							sync_mirrors = spawn(client, archinstall.flush_all_mirrors)
+#
+#						dependency = sync_mirrors
+#						if specific_mirrors:
+#							dependency = specific_mirrors
+#						spawn(client, archinstall.add_custom_mirror, **storage['custom_mirror'], start_callback=notify_mirror_updates, callback=notify_mirrors_complete, dependency=dependency)
+#
+#
+#					yield {
+#						'status' : 'success',
+#						'next' : 'hardware'
+#					}

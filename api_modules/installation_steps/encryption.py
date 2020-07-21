@@ -8,19 +8,20 @@ import session
 if 'harddrive' in session.steps:
 	html = f"""
 	<div class="padded_content flex_grow flex column">
-		<h3>Disk Encryption</h3>
-		<div class="warning">
-			<div class="warningHeader"><div class="noteIcon"></div><span>Warning</span></div>
-			<div class="noteBody">
-				After pressing any button at the bottom, <div class="inlineCode">{session.information['drive']}</div> will be completely erased <i>(wiped/formatted)</i>.<br>
-				<b>This action can not be undone!</b>
-			</div>
-		</div>
+		<h3>Disk Encryption <i>(Optional)</i></h3>
 
 		<div class="note">
 			<div class="noteHeader"><div class="noteIcon"></div><span>Note</span></div>
 			<div class="noteBody">
-				You can safely navigate in the left side menu without formatting any disks.
+				Disk encryption is optional, but if you value your local data <i>(including web browser history and logins)</i>, it's strongly
+				adviced that disk encryption is enabled. The minimum system requirements for disk encryption increases to <div class="inlineCode">1 GB</div> of RAM.
+			</div>
+		</div>
+
+		<div class="warning">
+			<div class="warningHeader"><div class="noteIcon"></div><span>Warning</span></div>
+			<div class="noteBody">
+				The password prompt while unlocking a drive is always <div class="inlineCode">en_US.UTF-8</div>, keep this in mind if you choose a password with special characters, that when prompted during boot for a disk password, the passphrase will be inputted with US keyboard layout<a target="_blank" href="https://bbs.archlinux.org/viewtopic.php?id=173506">[1]</a>.
 			</div>
 		</div>
 
@@ -72,8 +73,8 @@ document.querySelector('#skipButton').addEventListener('click', function() {
 })
 """
 
-def notify_credentials_saved(fileno, *args, **kwargs):
-	sockets[fileno].send({
+def notify_credentials_saved(worker, *args, **kwargs):
+	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
 		'source' : 'credentials',
 		'message' : 'Credentials saved.',

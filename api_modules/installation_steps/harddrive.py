@@ -14,7 +14,7 @@ html = """
 	<div class="note">
 		<div class="noteHeader"><div class="noteIcon"></div><span>Note</span></div>
 		<div class="noteBody">
-			Formatting will not start until encryption has been selected or skipped.
+			Formatting will not start until mirrors have been selected in the third step.
 		</div>
 	</div>
 	<select id="drives" class="flex_grow" size="3">
@@ -105,76 +105,12 @@ def notify_base_install_done(worker, *args, **kwargs):
 	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
 		'source' : 'base_os',
-		'message' : 'Base operating system is installed.',
+		'message' : '<div class="balloon">Installation complete, click here to <b class="reboot" onClick="reboot();">reboot</b> when you\'re done</div>',
+		'sticky' : True,
 		'status' : 'complete'
 	})
 
-# def notify_encryption_started(worker, *args, **kwargs):
-#	worker.frame.CLIENT_IDENTITY.send({
-#		'type' : 'notification',
-#		'source' : 'hardware',
-#		'message' : 'Encrypting hard drive.',
-#		'status' : 'active'
-#	})
-
-# def notify_base_configuration_started(worker, *args, **kwargs):
-#	worker.frame.CLIENT_IDENTITY.send({
-#		'type' : 'notification',
-#		'source' : 'base_os',
-#		'message' : 'Configuring base OS.',
-#		'status' : 'active'
-#	})
-
-# def notify_base_configuration(worker, *args, **kwargs):
-#	worker.frame.CLIENT_IDENTITY.send({
-#		'type' : 'notification',
-#		'source' : 'base_os',
-#		'message' : 'Base operating system has been configured.',
-#		'status' : 'active'
-#	})
-
-# def notify_bootloader_completion(worker, *args, **kwargs):
-#	worker.frame.CLIENT_IDENTITY.send({
-#		'type' : 'notification',
-#		'source' : 'base_os',
-#		'message' : 'Bootloader installed successfully.',
-#		'status' : 'active'
-#	})
-
-# def notify_root_pw(worker, *args, **kwargs):
-#	print('Notify root_root_pw called. Sending reboot button!')
-#	worker.frame.CLIENT_IDENTITY.send({
-#		'type' : 'notification',
-#		'source' : 'base_os',
-#		'message' : '<div class="balloon">Installation complete, click here to <b class="reboot" onClick="reboot();">reboot!</b></div>',
-#		'status' : 'complete'
-#	})
-
-#last_update = time.time() # We generally don't need this since we're pushing through localhost. But just to not spam he UI.
-# def progressbar(worker, output, *args, **kwargs):
-#	global last_update
-#	if len(output.strip()) and time.time() - last_update > 0.5:
-#		try:
-#			output = output.decode('UTF-8').strip()
-#			sockets[worker.client.sock.fileno()].send({
-#				'type' : 'notification',
-#				'source' : 'base_os',
-#				'message' : str(output[:120]),
-#				'status' : 'active'
-#			})
-#			last_update = time.time()
-#		except:
-#			pass
-
-def notify_language_set(worker, *args, **kwargs):
-	sockets[worker.client.sock.fileno()].send({
-		'type' : 'notification',
-		'source' : 'language',
-		'message' : 'Language has been configured.',
-		'status' : 'complete'
-	})
-
-def strap_in_the_basics(frame, drive, hostname='Archnistall', *args, **kwargs):
+def strap_in_the_basics(frame, drive, worker, hostname='Archnistall', *args, **kwargs):
 	with archinstall.Filesystem(drive, archinstall.GPT) as fs:
 		# Use partitioning helper to set up the disk partitions.
 		fs.use_entire_disk('ext4')
@@ -207,7 +143,8 @@ def strap_in_the_basics(frame, drive, hostname='Archnistall', *args, **kwargs):
 			if installation.minimal_installation():
 				installation.add_bootloader()
 
-				session.steps['base_os'] = True
+				session.steps['base_os'] = installation
+				session.steps['base_os_worker'] = worker
 
 	# Verified: Filesystem() doesn't do anything shady on __exit__
 	#           other than sync being called.
@@ -233,27 +170,28 @@ def on_request(frame):
 				session.steps['harddrive'] = True
 
 				yield {
-					'status' : 'success',
+					'status' : 'queued',
 					'next' : 'encryption',
 					'_modules' : 'harddrive' 
 				}
 
 		elif 'format' in frame.data:
-			print('Formatting without encryption on:', session.information['drive'])
-			strap_in = spawn(frame, strap_in_the_basics, drive=session.information['drive'], start_callback=notify_partitioning_started, callback=notify_base_install_done)
-			
-			yield {
-				'status' : 'success',
-				'next' : 'language', # base_os doesn't contain anything (yet)
-				'_modules' : 'encryption' 
-			}
+			if 'base_os' not in session.steps:
+				session.steps['base_os'] = spawn(frame, strap_in_the_basics, drive=session.information['drive'], start_callback=notify_partitioning_started, callback=notify_base_install_done, dependency='mirrors')
+				session.steps['encryption'] = True
 
-			yield {
-				'type' : 'notification',
-				'source' : 'encryption',
-				'message' : 'Encryption skipped',
-				'status' : 'complete'
-			}
+				yield {
+					'status' : 'success',
+					'next' : 'mirrors', # base_os doesn't contain anything (yet)
+					'_modules' : 'encryption' 
+				}
+
+				yield {
+					'type' : 'notification',
+					'source' : 'encryption',
+					'message' : 'Encryption skipped',
+					'status' : 'skipped'
+				}
 
 		"""
 			if 'dependencies' in data:

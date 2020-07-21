@@ -18,6 +18,8 @@
 	--ignored: #666666;
 	--active: #000000;
 	--yellow: #F6AA1C;
+	--queued: #fca130;
+	--skipped: #666666;
 }
 
 body {
@@ -139,7 +141,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	margin: 10px;
-	min-width: 150px;
+	min-width: 160px;
 
 	background-color: var(--light-grey);
 	border: 1px solid var(--light-grey-border);
@@ -262,11 +264,29 @@ body {
 		pointer-events: none;
 		transform: translateX(-100%);
 		transition: transform 0.3s ease;
+		
+		display: flex;
+		justify-content: flex-end;
 	}
 
+	.activityMessage {
+		transform: rotate(90deg);
+		margin: 0px;
+		line-height: 2.2em;
+		font-size: 0.7em;
+	}
 	.entry > .activity.complete {
 		transform: translateX(-90%);
 		background-color: var(--complete); /* TODO: transition this out as well */
+	}
+	.entry > .activity.skipped {
+		transform: translateX(-90%);
+		background-color: var(--skipped); /* TODO: transition this out as well */
+		color: var(--light-grey);
+	}
+	.entry > .activity.queued {
+		transform: translateX(-90%);
+		background-color: var(--queued); /* TODO: transition this out as well */
 	}
 	.entry > .activity.error {
 		transform: translateX(-90%);
