@@ -4,9 +4,9 @@
 [submodule "dependencies/slimHTTP"]
 	path = dependencies/slimHTTP
 	url = https://github.com/Torxed/slimHTTP.git
-[submodule "dependencies/spiderWeb"]
+[submodule "dependencies/slimWS"]
 	path = dependencies/slimWS
-	url = https://github.com/Torxed/spiderWeb.git
+	url = https://github.com/Torxed/slimWS.git
 [submodule "web_content/slimWebSocket"]
 	path = gui_data/slimWebSocket
 	url = https://github.com/Torxed/slimWebSocket.git
