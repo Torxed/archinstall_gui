@@ -73,13 +73,64 @@ document.querySelector('#skipButton').addEventListener('click', function() {
 })
 """
 
-def notify_credentials_saved(worker, *args, **kwargs):
-	worker.frame.CLIENT_IDENTITY.send({
+def strap_in_the_basics_with_encryption(frame, disk_password, drive, worker, hostname='Archnistall', *args, **kwargs):
+	frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
-		'source' : 'credentials',
-		'message' : 'Credentials saved.',
-		'status' : 'complete'
+		'source' : 'harddrive',
+		'message' : f"Paritioning has started on <div class=\"inlineCode\">{session.information['drive']}</div>",
+		'status' : 'active'
 	})
+
+	with archinstall.Filesystem(drive, archinstall.GPT) as fs:
+		# Use partitioning helper to set up the disk partitions.
+		fs.use_entire_disk('luks2')
+
+		if drive.partition[1].size == '512M':
+			raise OSError('Trying to encrypt the boot partition for petes sake..')
+		
+		frame.CLIENT_IDENTITY.send({
+			'type' : 'notification',
+			'source' : 'harddrive',
+			'message' : 'Paritioning is done',
+			'status' : 'complete'
+		})
+
+		frame.CLIENT_IDENTITY.send({
+			'type' : 'notification',
+			'source' : 'encryption',
+			'message' : f"Encrypting <div class=\"inlineCode\">{drive.partition[1]}</div>",
+			'status' : 'active'
+		})
+
+		drive.partition[0].format('fat32')
+		# First encrypt and unlock, then format the desired partition inside the encrypted part.
+		with archinstall.luks2(drive.partition[1], 'luksloop', disk_password) as unlocked_device:
+			unlocked_device.format('btrfs')
+
+			frame.CLIENT_IDENTITY.send({
+				'type' : 'notification',
+				'source' : 'encryption',
+				'message' : f"Encryption is done.",
+				'status' : 'complete'
+			})
+			
+			session.handles['filesystem'] = fs
+			session.handles['boot'] = drive.partition[0]
+			session.handles['root'] = unlocked_device
+
+			frame.CLIENT_IDENTITY.send({
+				'type' : 'notification',
+				'source' : 'base_os',
+				'message' : 'Installing base operating system',
+				'status' : 'active'
+			})
+
+			with archinstall.Installer(drive.partition[1], boot_partition=drive.partition[0], hostname=hostname) as installation:
+				if installation.minimal_installation():
+					installation.add_bootloader()
+
+					session.steps['base_os'] = installation
+					session.steps['base_os_worker'] = worker
 
 def on_request(frame):
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/encryption':

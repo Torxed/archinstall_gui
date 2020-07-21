@@ -1,7 +1,6 @@
-import json
+import json, time
 import urllib.request
 from os.path import isdir, isfile
-from time import time
 
 from dependencies import archinstall
 from lib.worker import spawn
@@ -152,6 +151,16 @@ def update_mirrorlist(frame, mirrors, worker, *args, **kwargs):
 
 def on_request(frame):
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/mirrors':
+		# Verify that the encryption step has been completed/skipped
+		if not 'encryption' in session.steps:
+			yield {
+				'status' : 'incomplete',
+				'next' : 'encryption',
+				'_modules' : 'mirrors'
+			}
+			return
+
+		# If no specific mirrors are given, return the HTML data.
 		if not 'mirrors' in frame.data:
 			yield {
 				'html' : html,
@@ -162,15 +171,14 @@ def on_request(frame):
 		elif frame.data['mirrors'] == 'refresh':
 			## https://www.archlinux.org/mirrors/status/json/
 			## https://www.archlinux.org/mirrorlist/?country=SE&protocol=https&use_mirror_status=on
-			if not 'mirrors' in session.information or time() - session.information['mirrors']['last_check'] > session.information['mirrors']['check_frequency']:
+			if not 'mirror_sync' in session.information or time.time() - session.information['mirror_sync']['last_check'] > session.information['mirror_sync']['check_frequency']:
 				frame.CLIENT_IDENTITY.server.log(f'Getting latest mirrors from archlinux.org')
 				with urllib.request.urlopen('https://www.archlinux.org/mirrors/status/json/') as url:
-					json_data = json.loads(url.read().decode())
-					session.information['mirrors'] = json_data
-					session.information['mirrors']['last_check'] = time() # Replace STRFTIME format with unix timestamp.
+					session.information['mirror_sync'] = json.loads(url.read().decode())
+					session.information['mirror_sync']['last_check'] = time.time() # Replace STRFTIME format with unix timestamp.
 
 			yield {
-				'mirrorlist' : session.information['mirrors'],
+				'mirrorlist' : session.information['mirror_sync'],
 				'_modules' : 'mirrors'
 			}
 		elif type(frame.data['mirrors']) == dict:

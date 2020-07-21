@@ -8,7 +8,22 @@ import session
 html = """
 <div class="padded_content flex_grow flex column">
 	<h3>AUR Support & Packages</h3>
-	<span>If you wish to set up a non-root account here and now, this section can do so.</span>
+	
+	<div class="note">
+		<div class="noteHeader"><div class="noteIcon"></div><span>Note</span></div>
+		<div class="noteBody">
+			The <a target="_blank" href="https://wiki.archlinux.org/index.php/Arch_User_Repository">Arch User Repository <i>(AUR)</i></a> is a collection of <a target="_blank" href="https://aur.archlinux.org/packages/">AUR packages</a> driven by the community.<br>
+		</div>
+	</div>
+	
+	<span>Installing and using AUR <i>(community)</i> packages inside your installation is provided by <a target="_blank" href="https://github.com/Jguer/yay">yay</a>.<br>
+	<div class="inlineCode">yay</div> is a small AUR helper, with many flags similar to <a target="_blank" href="https://wiki.archlinux.org/index.php/pacman"><div class="inlineCode">pacman</div></a> - the builtin package manager of Arch Linux.<br>
+	Although there are some differences, <div class="inlineCode">yay</div> should make it easier for beginners to install otherwise complicated community packages.<br>
+	<br>
+	It's <b>strongly suggested</b> that you read the official Wiki article regarding <a href="https://wiki.archlinux.org/index.php/Arch_User_Repository" target="_blank">Arch User Repository</a> in order to get familar and understand what could go wrong and how to maintain and install AUR packages in general.<br>
+	<br>
+	Before asking questions regarding AUR in the official support channels of Arch Linux, the Wiki article should be understood in full.</span>
+
 
 	<div class="note" id="base_os_wait">
 		<div class="noteHeader"><div class="noteIcon"></div><span>Note</span></div>
@@ -17,29 +32,11 @@ html = """
 		</div>
 	</div>
 
-	<div class="note">
-		<div class="noteHeader"><div class="noteIcon"></div><span>Note</span></div>
-		<div class="noteBody">
-			The <a target="_blank" href="https://wiki.archlinux.org/index.php/Arch_User_Repository">Arch User Repository</a> is a collection of <a target="_blank" href="https://aur.archlinux.org/packages/">AUR packages</a> driven by the community.<br>
-			After activating AUR support, any of the listed AUR packages can be installed here.
-		</div>
-	</div>
 
 	<div class="warning">
 		<div class="warningHeader"><div class="noteIcon"></div><span>Warning</span></div>
 		<div class="noteBody">
-			<b>Use it at your own risk!</b><br>
-			Be aware that these packages are not officially supported and therefore <b>can contain bugs, malicious code and/or break your system</b>.<br>
-			<br>
-		</div>
-	</div>
-
-	<div class="warning">
-		<div class="warningHeader"><div class="noteIcon"></div><span>Warning</span></div>
-		<div class="noteBody">
-			<b>Use it at your own risk!</b><br>
-			Once activated, AUR can not be disabled from the installer.<br>
-			You would need to boot your installation and remove the package <div class="inlineCode">yay</div> manually.
+			<b>Use AUR at your own risk!</b> These packages are not officially supported and therefore <b>can contain bugs, malicious code and/or break your system</b>.<br>
 			<br>
 		</div>
 	</div>
