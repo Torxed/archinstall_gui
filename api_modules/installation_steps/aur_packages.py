@@ -25,7 +25,7 @@ html = """
 	Before asking questions regarding AUR in the official support channels of Arch Linux, the Wiki article should be understood in full.</span>
 
 
-	<div class="note" id="base_os_wait">
+	<div class="note" id="arch_linux_worker_wait">
 		<div class="noteHeader"><div class="noteIcon"></div><span>Note</span></div>
 		<div class="noteBody">
 			AUR support will be added once the Base OS step is complete.
@@ -79,57 +79,28 @@ document.querySelector('#install_packages').addEventListener('click', function()
 })
 
 document.querySelector('#skip_step').addEventListener('click', function() {
-	notification({
-		'source' : 'aur_packages',
-		'status' : 'skipped',
-		'next' : 'base_os'
+	socket.send({
+		'_module' : 'installation_steps/aur_packages',
+		'skip' : true
 	})
 })
 
 """
 
-def notify_template_installed(worker, *args, **kwargs):
-	sockets[worker.client.sock.fileno()].send({
-		'type' : 'notification',
-		'source' : 'profiles',
-		'message' : 'Template has been installed.',
-		'status' : 'complete'
-	})
-
-def notify_template_started(worker, *args, **kwargs):
-	sockets[worker.client.sock.fileno()].send({
-		'type' : 'notification',
-		'source' : 'profiles',
-		'message' : 'Template is being installed',
-		'status' : 'active'
-	})
-
-def request_input(key, *args, **kwargs):
-	if key in storage['credentials']:
-		return storage['credentials'][key]
-	elif key in storage:
-		return storage[key]
-	return None
-
-last_update = time.time() # We generally don't need this since we're pushing through localhost. But just to not spam he UI.
-def progressbar(worker, output, *args, **kwargs):
-	global last_update
-	if len(output.strip()) and time.time() - last_update > 0.5:
-		try:
-			output = output.decode('UTF-8').strip()
-			sockets[worker.client.sock.fileno()].send({
-				'type' : 'notification',
-				'source' : 'profiles',
-				'message' : str(output[:120]),
-				'status' : 'active'
-			})
-			last_update = time.time()
-		except:
-			pass
+def stub(*args, **kwargs):
+	return True
 
 def on_request(frame):
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/aur_packages':
-		if not 'packages' in frame.data:
+		if 'skip' in frame.data:
+			session.steps['aur_packages'] = spawn(frame, stub, dependency='accounts')
+			yield {
+				'_modules' : 'aur_packages',
+				'status' : 'skipped',
+				'next' : 'arch_linux'
+			}
+			return
+		elif not 'packages' in frame.data:
 			yield {
 				'html' : html,
 				'javascript' : javascript,
@@ -139,5 +110,5 @@ def on_request(frame):
 			yield {
 				'status' : 'queued',
 				'_modules' : 'aur_packages',
-				'next' : 'base_os'
+				'next' : 'arch_linux'
 			}

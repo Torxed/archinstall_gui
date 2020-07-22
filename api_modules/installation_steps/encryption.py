@@ -3,7 +3,6 @@ from os.path import isdir, isfile
 
 from dependencies import archinstall
 from lib.worker import spawn
-from lib.helpers import install_base_os
 
 import session
 
@@ -85,7 +84,7 @@ def notify_partitioning_started(worker, *args, **kwargs):
 def notify_base_install_done(worker, *args, **kwargs):
 	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
-		'source' : 'base_os',
+		'source' : 'arch_linux',
 		'message' : '<div class="balloon">Installation complete, click here to <b class="reboot" onClick="reboot();">reboot</b> when you\'re done</div>',
 		'sticky' : True,
 		'status' : 'complete'
@@ -131,7 +130,7 @@ def strap_in_the_basics_with_encryption(frame, disk_password, drive, worker, hos
 
 			frame.CLIENT_IDENTITY.send({
 				'type' : 'notification',
-				'source' : 'base_os',
+				'source' : 'arch_linux',
 				'message' : 'Installing base operating system',
 				'status' : 'active'
 			})
@@ -140,8 +139,8 @@ def strap_in_the_basics_with_encryption(frame, disk_password, drive, worker, hos
 				if installation.minimal_installation():
 					installation.add_bootloader()
 
-					session.steps['base_os'] = installation
-					session.steps['base_os_worker'] = worker
+					session.steps['arch_linux'] = installation
+					session.steps['arch_linux_worker'] = worker
 
 	return True
 

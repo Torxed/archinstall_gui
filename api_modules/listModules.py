@@ -9,7 +9,7 @@ def on_request(frame):
 				'Harddrive' : {'required' : True, 'defaults' : {}},
 				'Encryption' : {'required' : True, 'defaults' : {}},
 				'Mirrors' : {'required' : True, 'defaults' : {}},
-				'Base OS' : {'required' : False, 'defaults' : {}},
+				'Arch Linux' : {'required' : False, 'defaults' : {}},
 				'Language' : {'required' : False, 'defaults' : {}},
 				'Profiles' : {'required' : False, 'defaults' : {}},
 				'Applications' : {'required' : False, 'defaults' : {}},

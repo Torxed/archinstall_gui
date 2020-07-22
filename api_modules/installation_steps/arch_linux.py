@@ -54,9 +54,9 @@ javascript = """
 """
 
 def on_request(frame):
-	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/base_os':
+	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/arch_linux':
 		yield {
 			'html' : html,
 			'javascript' : javascript,
-			'_modules' : 'base_os'
+			'_modules' : 'arch_linux'
 		}

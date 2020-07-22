@@ -3,7 +3,6 @@ from os.path import isdir, isfile
 
 from dependencies import archinstall
 from lib.worker import spawn
-from lib.helpers import install_base_os
 
 import session
 
@@ -97,14 +96,14 @@ def notify_partitioning_done(worker, *args, **kwargs):
 def notify_base_install_started(worker, *args, **kwargs):
 	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
-		'source' : 'base_os',
+		'source' : 'arch_linux',
 		'message' : 'Installing base operating system',
 		'status' : 'active'
 	})
 def notify_base_install_done(worker, *args, **kwargs):
 	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
-		'source' : 'base_os',
+		'source' : 'arch_linux',
 		'message' : '<div class="balloon">Installation complete, click here to <b class="reboot" onClick="reboot();">reboot</b> when you\'re done</div>',
 		'sticky' : True,
 		'status' : 'complete'
@@ -134,7 +133,7 @@ def strap_in_the_basics(frame, drive, worker, hostname='Archnistall', *args, **k
 
 		frame.CLIENT_IDENTITY.send({
 			'type' : 'notification',
-			'source' : 'base_os',
+			'source' : 'arch_linux',
 			'message' : 'Installing base operating system',
 			'status' : 'active'
 		})
@@ -143,8 +142,8 @@ def strap_in_the_basics(frame, drive, worker, hostname='Archnistall', *args, **k
 			if installation.minimal_installation():
 				installation.add_bootloader()
 
-				session.steps['base_os'] = installation
-				session.steps['base_os_worker'] = worker
+				session.steps['arch_linux'] = installation
+				session.steps['arch_linux_worker'] = worker
 
 	# Verified: Filesystem() doesn't do anything shady on __exit__
 	#           other than sync being called.
@@ -176,13 +175,13 @@ def on_request(frame):
 				}
 
 		elif 'format' in frame.data:
-			if 'base_os' not in session.steps:
-				session.steps['base_os'] = spawn(frame, strap_in_the_basics, drive=session.information['drive'], start_callback=notify_partitioning_started, callback=notify_base_install_done, dependency='mirrors')
+			if 'arch_linux' not in session.steps:
+				session.steps['arch_linux'] = spawn(frame, strap_in_the_basics, drive=session.information['drive'], start_callback=notify_partitioning_started, callback=notify_base_install_done, dependency='mirrors')
 				session.steps['encryption'] = True
 
 				yield {
 					'status' : 'success',
-					'next' : 'mirrors', # base_os doesn't contain anything (yet)
+					'next' : 'mirrors', # arch_linux doesn't contain anything (yet)
 					'_modules' : 'encryption' 
 				}
 
@@ -192,53 +191,3 @@ def on_request(frame):
 					'message' : 'Encryption skipped',
 					'status' : 'skipped'
 				}
-
-		"""
-			if 'dependencies' in data:
-				for dependency in data['dependencies']:
-					if not dependency in storage:
-						yield {	
-							'status' : 'failed',
-							'message' : f"Dependency '{dependency}' is not met."
-						}
-						return None # Break
-
-			storage['drive'] = data['hardware']['drive']
-			storage['start'] = '512MiB'
-			storage['size'] = '100%'
-
-			archinstall.args['drive'] = storage['drive']
-			archinstall.args['start'] = storage['start']
-			archinstall.args['size'] = storage['size']
-			
-			print(json.dumps(archinstall.args, indent=4))
-
-			if not storage['SAFETY_LOCK']:
-				archinstall.cache_diskpw_on_disk()
-				archinstall.close_disks()
-
-				if not 'mirror_region' in storage or 'mirror_specific' in storage:
-					## TODO: add geoip guessing, and run filter_mirrors_by_country_list([GEOIP_GUESSED])
-					spawn(client, archinstall.re_rank_mirrors)
-
-				fmt = spawn(client, archinstall.format_disk, drive='drive', start='start', end='size', start_callback=notify_partitioning_started)
-				refresh = spawn(client, archinstall.refresh_partition_list, drive='drive', dependency=fmt)
-				mkfs = spawn(client, archinstall.mkfs_fat32, drive='drive', partition='1', dependency=refresh)
-				encrypt = spawn(client, archinstall.encrypt_partition, drive='drive', partition='2', keyfile='pwfile', start_callback=notify_encryption_started, dependency=mkfs)
-				mount_luksdev = spawn(client, archinstall.mount_luktsdev, drive='drive', partition='2', keyfile='pwfile', dependency=encrypt)
-				btrfs = spawn(client, archinstall.mkfs_btrfs, dependency=mount_luksdev)
-				progress['formatting'] = spawn(client, archinstall.mount_mountpoints, drive='drive', bootpartition='1', callback=notify_partitioning_done, dependency=btrfs)
-				progress['strap_in'] = spawn(client, archinstall.strap_in_base, on_output=progressbar, start_callback=notify_base_install_started, callback=notify_base_install_done, dependency=progress['formatting'])
-				if not 'set_locale' in progress:
-					progress['set_locale'] = spawn(client, archinstall.set_locale, fmt='en_US.UTF-8 UTF-8', callback=notify_language_set, dependency='strap_in')
-				progress['configure_base_system'] = spawn(client, archinstall.configure_base_system, start_callback=notify_base_configuration_started, callback=notify_base_configuration, dependency=progress['strap_in'])
-				progress['setup_bootloader'] = spawn(client, archinstall.setup_bootloader, callback=notify_bootloader_completion, dependency=progress['configure_base_system'])
-				progress['set_root_pw'] = spawn(client, archinstall.set_password, callback=notify_root_pw, dependency=progress['setup_bootloader'], user='root', password=storage['credentials']['disk_password'])
-				
-			else:
-				print('Emulating: Formatting drive:', storage['drive'])
-
-			yield {
-				'status' : 'success',
-				'next' : 'base_os'
-			}"""

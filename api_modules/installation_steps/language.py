@@ -93,10 +93,10 @@ def set_locale(frame, fmt, *args, **kwargs):
 	encoding = 'UTF-8'
 	if ' ' in fmt:
 		fmt, encoding = fmt.split(' ', 1)
-	return session.steps['base_os'].set_locale(fmt, encoding)
+	return session.steps['arch_linux'].set_locale(fmt, encoding)
 
 def set_timezone(frame, tz, *args, **kwargs):
-	return session.steps['base_os'].set_timezone(tz)
+	return session.steps['arch_linux'].set_timezone(tz)
 
 def on_request(frame):
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/language':
@@ -110,8 +110,8 @@ def on_request(frame):
 
 			# TODO: Perhaps just change the language if the process hasn't yet finished.
 			if not 'locale' in session.steps:
-				session.steps['locale'] = spawn(frame, set_locale, fmt=frame.data['locale'], start_callback=language_config_start, dependency='base_os_worker')
-				session.steps['timezone'] = spawn(frame, set_timezone, tz=frame.data['timezone'], callback=notify_language_set, dependency=session.steps['locale'])
+				session.steps['locale'] = spawn(frame, set_locale, fmt=frame.data['locale'], start_callback=language_config_start, dependency='arch_linux_worker')
+				session.steps['language'] = spawn(frame, set_timezone, tz=frame.data['timezone'], callback=notify_language_set, dependency=session.steps['locale'])
 
 				yield {
 					'status' : 'queued',

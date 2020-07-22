@@ -10,7 +10,7 @@ html = """
 	<h3>Additional user account</h3>
 	<span>If you wish to set up a non-root account here and now, this section can do so.</span>
 
-	<div class="note" id="base_os_wait">
+	<div class="note" id="arch_linux_worker_wait">
 		<div class="noteHeader"><div class="noteIcon"></div><span>Note</span></div>
 		<div class="noteBody">
 			The additional user creation will be queued until the Base OS is installed.
@@ -67,57 +67,28 @@ document.querySelector('#create_user').addEventListener('click', function() {
 })
 
 document.querySelector('#skip_accounts').addEventListener('click', function() {
-	notification({
-		'source' : 'accounts',
-		'status' : 'skipped',
-		'next' : 'aur_packages'
+	socket.send({
+		'_module' : 'installation_steps/accounts',
+		'skip' : true
 	})
 })
 
 """
 
-def notify_template_installed(worker, *args, **kwargs):
-	sockets[worker.client.sock.fileno()].send({
-		'type' : 'notification',
-		'source' : 'profiles',
-		'message' : 'Template has been installed.',
-		'status' : 'complete'
-	})
-
-def notify_template_started(worker, *args, **kwargs):
-	sockets[worker.client.sock.fileno()].send({
-		'type' : 'notification',
-		'source' : 'profiles',
-		'message' : 'Template is being installed',
-		'status' : 'active'
-	})
-
-def request_input(key, *args, **kwargs):
-	if key in storage['credentials']:
-		return storage['credentials'][key]
-	elif key in storage:
-		return storage[key]
-	return None
-
-last_update = time.time() # We generally don't need this since we're pushing through localhost. But just to not spam he UI.
-def progressbar(worker, output, *args, **kwargs):
-	global last_update
-	if len(output.strip()) and time.time() - last_update > 0.5:
-		try:
-			output = output.decode('UTF-8').strip()
-			sockets[worker.client.sock.fileno()].send({
-				'type' : 'notification',
-				'source' : 'profiles',
-				'message' : str(output[:120]),
-				'status' : 'active'
-			})
-			last_update = time.time()
-		except:
-			pass
+def stub(*args, **kwargs):
+	return True
 
 def on_request(frame):
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/accounts':
-		if not 'user' in frame.data or 'group' not in frame.data:
+		if 'skip' in frame.data:
+			session.steps['accounts'] = spawn(frame, stub, dependency='applications')
+			yield {
+				'_modules' : 'accounts',
+				'status' : 'skipped',
+				'next' : 'aur_packages'
+			}
+			return
+		elif not 'user' in frame.data or 'group' not in frame.data:
 			yield {
 				'html' : html,
 				'javascript' : javascript,

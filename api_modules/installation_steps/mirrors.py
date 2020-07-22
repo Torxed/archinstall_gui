@@ -61,8 +61,8 @@ if 'encryption' in session.steps:
 
 			<div class="buttons bottom">
 				<button id="save_mirrors">Use selected mirrors</button>
-				<button id="save_mirrors">Use Automatic detection</button>
-				<button id="save_mirrors">Skip and use default mirrors</button>
+				<button id="user_automatic_detection">Use Automatic detection</button>
+				<button id="skip_step">Skip and use default mirrors</button>
 			</div>
 		</div>
 	"""
@@ -72,6 +72,13 @@ else:
 ## TODO:
 ## Needs to be loaded this way, since we can't inject JS into divs etc in the HTML above.
 javascript = """
+
+document.querySelector('#skip_step').addEventListener('click', function() {
+	socket.send({
+		'_module' : 'installation_steps/mirrors',
+		'skip' : true
+	})
+})
 
 document.querySelector('#save_mirrors').addEventListener('click', function() {
 	let mirrors = {};
@@ -149,14 +156,27 @@ def notify_mirror_updates(worker, *args, **kwargs):
 def update_mirrorlist(frame, mirrors, worker, *args, **kwargs):
 	return archinstall.insert_mirrors(mirrors)
 
+def stub(*args, **kwargs):
+	return True
+
 def on_request(frame):
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/mirrors':
+
 		# Verify that the encryption step has been completed/skipped
 		if not 'encryption' in session.steps:
 			yield {
 				'status' : 'incomplete',
 				'next' : 'encryption',
 				'_modules' : 'mirrors'
+			}
+			return
+
+		if 'skip' in frame.data:
+			session.steps['mirrors'] = spawn(frame, stub)
+			yield {
+				'_modules' : 'mirrors',
+				'status' : 'complete',
+				'next' : 'language'
 			}
 			return
 
@@ -206,42 +226,11 @@ def on_request(frame):
 
 			yield {
 				'status' : 'queued',
-				'_modules' : 'base_os' 
+				'_modules' : 'arch_linux' 
 			}
 			
 			yield {
 				'status' : 'success',
-				'next' : 'language', # base_os doesn't contain anything (yet)
+				'next' : 'language', # skip arch_linux as it's an informational page, will be redirected after the last AUR step.
 				'_modules' : 'mirrors' 
 			}
-
-
-#					storage['custom_mirror'] = {'name' : frame.data['mirrors']['mirror_name'], 'url' : frame.data['mirrors']['mirror_url']}
-#					log(f"Storing selected mirrors. Region: {storage['mirror_region']}, Specifics: {storage['mirror_specific']}", level=4, origin='api.mirrors')
-#
-#					sync_mirrors = None
-#					specific_mirrors = None
-#					if storage['mirror_region']:
-#						sync_mirrors = spawn(client, archinstall.filter_mirrors_by_country_list, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, countries=storage['mirror_region'])#, dependency='formatting') # NOTE: This updates the live/local mirrorlist, which will be copied in the install steps later by pacstrap.
-#
-#					if storage['mirror_specific']:
-#						if not storage['mirror_region']:
-#							# Before adding specific mirrors, flush the default mirrors if we didn't supply a specific region as well.
-#							# A region (SE) could for instance have been selected, then we won't flush that but simply add additional ones.
-#							sync_mirrors = spawn(client, archinstall.flush_all_mirrors)
-#						specific_mirrors = spawn(client, archinstall.add_specific_mirrors, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, mirrors=storage['mirror_specific'], dependency=sync_mirrors)
-#
-#					if storage['custom_mirror']['name'] and storage['custom_mirror']['url']:
-#						if not storage['mirror_region'] and not storage['mirror_specific']:
-#							sync_mirrors = spawn(client, archinstall.flush_all_mirrors)
-#
-#						dependency = sync_mirrors
-#						if specific_mirrors:
-#							dependency = specific_mirrors
-#						spawn(client, archinstall.add_custom_mirror, **storage['custom_mirror'], start_callback=notify_mirror_updates, callback=notify_mirrors_complete, dependency=dependency)
-#
-#
-#					yield {
-#						'status' : 'success',
-#						'next' : 'hardware'
-#					}

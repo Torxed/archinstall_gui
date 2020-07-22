@@ -40,10 +40,9 @@ document.querySelector('#save_templates').addEventListener('click', function() {
 })
 
 document.querySelector('#skip_templates').addEventListener('click', function() {
-	notification({
-		'source' : 'profiles',
-		'status' : 'skipped',
-		'next' : 'applications'
+	socket.send({
+		'_module' : 'installation_steps/profiles',
+		'skip' : true
 	})
 })
 
@@ -75,87 +74,72 @@ socket.send({'_module' : 'installation_steps/profiles', 'templates' : 'refresh'}
 
 """
 
-def notify_template_installed(worker, *args, **kwargs):
-	sockets[worker.client.sock.fileno()].send({
-		'type' : 'notification',
-		'source' : 'profiles',
-		'message' : 'Template has been installed.',
-		'status' : 'complete'
-	})
 
 def notify_template_started(worker, *args, **kwargs):
-	sockets[worker.client.sock.fileno()].send({
+	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
 		'source' : 'profiles',
 		'message' : 'Template is being installed',
 		'status' : 'active'
 	})
 
-def request_input(key, *args, **kwargs):
-	if key in storage['credentials']:
-		return storage['credentials'][key]
-	elif key in storage:
-		return storage[key]
-	return None
+def notify_template_installed(worker, *args, **kwargs):
+	worker.frame.CLIENT_IDENTITY.send({
+		'type' : 'notification',
+		'source' : 'profiles',
+		'message' : 'Template has been installed.',
+		'status' : 'complete'
+	})
 
-last_update = time.time() # We generally don't need this since we're pushing through localhost. But just to not spam he UI.
-def progressbar(worker, output, *args, **kwargs):
-	global last_update
-	if len(output.strip()) and time.time() - last_update > 0.5:
-		try:
-			output = output.decode('UTF-8').strip()
-			sockets[worker.client.sock.fileno()].send({
-				'type' : 'notification',
-				'source' : 'profiles',
-				'message' : str(output[:120]),
-				'status' : 'active'
-			})
-			last_update = time.time()
-		except:
-			pass
+def install_profile(frame, profile_name, worker, hostname='Archnistall', *args, **kwargs):
+	return session.steps['arch_linux'].install_profile(session.information['profiles_cache'][profile_name])
+
+def stub(*args, **kwargs):
+	return True
 
 def on_request(frame):
+	print(frame.data)
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/profiles':
-		if not 'templates' in frame.data:
+		if 'skip' in frame.data:
+			session.steps['profiles'] = spawn(frame, stub, dependency='language')
 			yield {
-				'html' : html,
-				'javascript' : javascript,
-				'_modules' : 'profiles'
+				'_modules' : 'profiles',
+				'status' : 'skipped',
+				'next' : 'applications'
 			}
+			return
+
 		elif 'templates' in frame.data:
 			if frame.data['templates'] == 'refresh':
 				## https://github.com/Torxed/archinstall/tree/master/deployments
 				## document.querySelectorAll('.js-navigation-open') -> item.title
 				
-				templates = {}
+				session.information['profiles_cache'] = {}
 				for root, folders, files in os.walk('./dependencies/archinstall/profiles/'):
 					for file in files:
 						extension = os.path.splitext(file)[1]
 						if extension in ('.json', '.py'):
-							templates[file] = extension
+							session.information['profiles_cache'][file] = os.path.join(root, file)
 					break
 
 				yield {
 					'status' : 'success',
-					'templates' : templates
+					'templates' : session.information['profiles_cache']
 				}
-		"""
-		elif 'template' in data:
+		
+		elif 'template' in frame.data and frame.data['template'].strip():
 			
-			archinstall.instructions = archinstall.get_instructions(data['template'])
-			archinstall.instructions = archinstall.merge_in_includes(archinstall.instructions)
-			archinstall.cleanup_args(input_redirect=request_input)
-			progress['install_template'] = spawn(client, archinstall.run_post_install_steps, dependency='setup_bootloader', on_output=progressbar, start_callback=notify_template_started, callback=notify_template_installed)
-			if 'set_root_pw' in progress:
-				log(f" --- Changing set_root_pw dependency to: {progress['install_template']}")
-				log(f"Changing set_root_pw dependency to: {progress['install_template']}", level=3, origin='templates.parse')
-				progress['set_root_pw'].kwargs['dependency'] = progress['install_template']
-			else:
-				print('--- No set_root_pw when running templates')
-
+			session.steps['profiles'] = spawn(frame, install_profile, profile_name=frame.data['template'], start_callback=notify_template_started, callback=notify_template_installed, dependency='language')
+			
 			yield {
-					'status' : 'success',
-					'next' : 'language'
-				}
-		"""
+				'status' : 'queued',
+				'next' : 'applications',
+				'_modules' : 'profiles' 
+			}
 
+		else:
+			yield {
+				'html' : html,
+				'javascript' : javascript,
+				'_modules' : 'profiles'
+			}
