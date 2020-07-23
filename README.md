@@ -6,8 +6,8 @@ See trouble-shooting a bit further down.
 > **Note**: If you're not familiar with Arch Linux or the installation process, please have a look at the comprehensive [Installation Guide](https://wiki.archlinux.org/index.php/Installation_guide). Arch Linux **does not** come default with a graphical desktop environment.
 
 # Demo / Screenshot
+A demo can be viewed on <a target="_blank" href="https://youtu.be/ZRRSUxGF_Es"><img src="docs/_static/youtube_logo.png" width="80px"></a>
 
-[A video demonstration](https://youtu.be/btdCE-u5n8U)
 ![screenshot](screenshot.png)
 
 # Pre-built Live ISO:
