@@ -1,0 +1,268 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="./style.css">
+		<link rel="icon" type="image/png" href="./arch_linux_icon.png">
+		<script type="text/javascript" src="./slimWebSocket/slimWebSocket.js"></script>
+		<title>Archinstall GUI</title>
+		<script type="text/javascript">
+			let socket = new slimWebSocket('ws://127.0.0.1');
+			var xhr = null;
+
+			// Configuration, once set, certain fields will be blocked.
+			let drives = {};
+			let selected_drive = null;
+			let disk_password = null;
+			let hostname = null;
+			let mirror_list = {};
+			let sticky_notification = null;
+
+			let module_states = {}; // Save the queued/completed/skipped/error states per module so we can track when the installation is complete.
+
+			let initiated = false;
+			let archinstall_timers = {};
+
+			// Loading JavaScript from a cross-site resource is blocked.
+			// But there's nothing stopping us from downloading the script
+			// as a text-blob and placing it within the <script> </ script> tags,
+			// which causes the browser to parse it, but not as a forrain object.
+			//
+			// #LoadingScriptsFromGithub
+			var script = document.createElement('script');
+			script.type = 'text/javascript';
+
+			function sysinfo(data) {
+				document.querySelector('#adderall_version').innerHTML = `installer ${data['sysinfo']['version']}`;
+				return true;
+			}
+
+			function reboot() {
+				socket.send({
+					'_module' : 'reboot'
+				})
+			}
+
+			function listModules(data) {
+				console.log('Listing modules:', data)
+				let modules = document.querySelector('#modules');
+				let entries = document.createElement('div');
+				let buttons = document.createElement('div');
+				entries.classList = 'entries';
+				modules.innerHTML = '';
+
+				Object.keys(data['modules']).forEach((raw_module_name) => {
+					let module_name = raw_module_name.toLowerCase().replace(' ', '_');
+
+					let entry = document.createElement('div');
+					let mod = document.createElement('button');
+					let activity = document.createElement('div');
+					entry.classList = 'entry';
+					mod.id = 'btn_'+module_name;
+					mod.innerHTML = raw_module_name;
+					if(data['modules'][raw_module_name]['required'])
+						mod.innerHTML += '<img src="./required.png" style="width: 12px; height: 12px; padding-left: 10px;">'
+					mod.setAttribute('module_name', module_name);
+					mod.addEventListener('click', function() {
+						socket.send({
+							'_module' : 'installation_steps/'+module_name
+						})
+					})
+					activity.classList = 'activity';
+					entry.appendChild(mod);
+					entry.appendChild(activity);
+					entries.appendChild(entry);
+				})
+
+				modules.appendChild(entries);
+
+				if(!initiated) {
+					socket.send({
+						'_module' : 'installation_steps/'+Object.keys(data['modules'])[0]
+					})
+					initiated = true;
+				}
+			}
+
+			function genericStepLoader(data) {
+				console.log(data);
+				if(typeof data['html'] !== 'undefined')
+					document.querySelector('#configuration').innerHTML = data['html'];
+
+				if(typeof data['status'] !== 'undefined') {
+					module_states[data['_modules']] = data['status'];
+					if (['success', 'queued', 'skipped', 'complete'].includes(data['status'])) {
+						let btn = document.querySelector('#btn_'+data['_modules']);
+						let img = btn.querySelector('img');
+						let activity = btn.parentNode.querySelector('.activity');
+						if(img)
+							img.remove();
+
+						activity.classList = 'activity ' + data['status'];
+						if (['queued', 'skipped'].includes(data['status'])) {
+							let msg = document.createElement('div');
+							msg.classList = 'activityMessage';
+							msg.innerHTML = data['status'].toUpperCase();
+							activity.appendChild(msg);
+						} else {
+							activity.innerHTML = '';
+						}
+					}
+				}
+
+				if(typeof data['javascript'] !== 'undefined') {
+					let script = document.querySelector('#script_'+data['_modules']);
+					if(script)
+						script.remove();
+
+					script = document.createElement('script');
+					script.id = 'script_'+data['_modules'];
+					script.innerHTML = data['javascript'];
+					document.head.appendChild(script);
+				}
+
+				if(typeof data['next'] !== 'undefined') {
+					socket.send({'_module' : 'installation_steps/'+data['next']});
+				}
+
+				return true;
+			}
+
+			function notification(data) {
+				console.log('Notification:', data)
+				if (typeof data['source'] !== 'undefined' && typeof data['status'] !== 'undefined') {
+					module_states[data['source']] = data['status'];
+
+					let button = document.querySelector('#btn_'+data['source']);
+					let activity = button.parentNode.querySelector('.activity');
+					activity.classList = 'activity ' + data['status'];
+
+					activity.classList = 'activity ' + data['status'];
+					if (['queued', 'skipped'].includes(data['status'])) {
+						let msg = document.createElement('div');
+						msg.classList = 'activityMessage';
+						msg.innerHTML = data['status'].toUpperCase();
+						activity.appendChild(msg);
+					} else {
+						activity.innerHTML = '';
+					}
+				}
+
+				if(typeof data['message'] !== 'undefined')
+					document.querySelector('.status').innerHTML = data['message']
+
+				if(typeof data['next'] !== 'undefined')
+					socket.send({'_module' : 'installation_steps/'+data['next']});
+
+				if(typeof data['sticky'] !== 'undefined') {
+					sticky_notification = data;
+				} else {
+					if(sticky_notification) {
+						if(typeof archinstall_timers['stickyNotification'] !== 'undefined')
+							clearInterval(archinstall_timers['stickyNotification']);
+
+						archinstall_timers['stickyNotification'] = setInterval(() => {
+							let all_done = true;
+							Object.keys(module_states).forEach((key) => {
+								if(['queued', 'active', 'error'].includes(module_states[key])) {
+									all_done = false;
+									return;
+								}
+							})
+
+							if (all_done)
+								notification(sticky_notification);
+
+							clearInterval(archinstall_timers['stickyNotification']);
+						}, 1000)
+					}
+				}
+
+				return true;
+			}
+
+			function listMirrors(data) {
+				console.log(data);
+
+				if(typeof data['html'] !== 'undefined')
+					document.querySelector('#configuration').innerHTML = data['html'];
+
+				if(typeof data['javascript'] !== 'undefined') {
+					let script = document.querySelector('#script_mirrors');
+					if(script)
+						script.remove();
+
+					script = document.createElement('script');
+					script.id = 'script_mirrors';
+					script.innerHTML = data['javascript'];
+					document.head.appendChild(script);
+				}
+
+				if(typeof data['next'] !== 'undefined') {
+					socket.send({'_module' : 'installation_steps/'+data['next']});
+				}
+			}
+
+			window.show_install_log = function() {
+				socket.send({'_module' : 'installation_steps/install_log'});
+			}
+
+			window.onload = function() {
+				socket.subscribe('sysinfo', sysinfo)
+				socket.subscribe('listModules', listModules)
+				socket.subscribe('notification', notification)
+
+				socket.subscribe('harddrive', genericStepLoader)
+				socket.subscribe('encryption', genericStepLoader)
+				socket.subscribe('mirrors', genericStepLoader)
+				socket.subscribe('arch_linux', genericStepLoader) // Doesn't have a step currently. Just acts as a notification when the OS is being installed.
+				socket.subscribe('language', genericStepLoader)
+				socket.subscribe('profiles', genericStepLoader)
+				socket.subscribe('applications', genericStepLoader)
+				socket.subscribe('accounts', genericStepLoader)
+				socket.subscribe('aur_packages', genericStepLoader)
+
+				// Two special cases, install_log being at the end if AUR_support to show what's going on.
+				// and mirrorlist is a special event from the mirrors-step (TODO: Some how get this away and into the mirrors step itself)
+				socket.subscribe('install_log', genericStepLoader)
+				socket.subscribe('mirrorlist', listMirrors)
+
+				socket.send({"_module" : "sysinfo"});
+				socket.send({"_module" : "listModules"});
+			}
+		</script>
+	</head>
+	<body>
+		<div class="container rows">
+			<div class="menu">
+				<div class="logo">
+					Arch<span>Linux</span><span class="version" id="adderall_version">installer {version}</span>
+				</div>
+				<div class="status">
+				</div>
+				<div class="menu_buttons">
+					<button class="active">Steps</button>
+					<button onClick="show_install_log();">Install log</button>
+				</div>
+			</div>
+			<div id="content" class="content">
+				<div class="sidemenu">
+					<div class="header">Installation Steps</div>
+					<div class="entries" id="modules">
+						<div class="loading">
+							<div class="loader">
+								<div class="loader_image rotating"></div>
+							</div>
+							<span>Loading pre-configured steps..</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="configuration expand">
+					<div class="header" id="config_header"></div>
+					<div class="step flex_grow" id="configuration">
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

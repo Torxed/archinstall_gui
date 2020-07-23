@@ -1,0 +1,5 @@
+{
+    "install cmatrix": {
+        "pacman -Syy --noconfirm cmatrix" : null
+    }
+}
