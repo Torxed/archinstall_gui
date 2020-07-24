@@ -17,7 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'Arch Installer GUI'
+project = 'Arch Install GUI'
 copyright = '2020, Anton Hvornum'
 author = 'Anton Hvornum'
 
@@ -85,14 +85,14 @@ html_show_sourcelink = False
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'archinstallerguidoc'
+htmlhelp_basename = 'archinstallguidoc'
 
 # -- Options for manual page output --------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'Arch Installer GUI', u'Arch Installer GUI Documentation',
+    ('index', 'Arch Install GUI', u'Arch Install GUI Documentation',
      [u'Anton Hvornum'], 1)
 ]
 
@@ -106,6 +106,6 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Arch Installer GUI', u'Arch Installer GUI Documentation',
-   u'Anton Hvornum', 'Arch Installer GUI', 'Simple and minimal HTTP server.'),
+  ('index', 'Arch Install GUI', u'Arch Install GUI Documentation',
+   u'Anton Hvornum', 'Arch Install GUI', 'Simple and minimal HTTP server.'),
 ]

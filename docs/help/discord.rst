@@ -1,11 +1,13 @@
-.. _help.discord:
+.. _discord:
 
 Discord
 =======
 
-There's a discord channel which is frequent by the `contributors <https://github.com/Torxed/slimDNS/graphs/contributors>`_.
+.. warning:: Do not report issues to the Arch Linux forums, this is not an official app.
 
-To join the server, head over to `discord.com/slimDNS <https://discord.gg/CMjZbwR>`_ and join in.
+There's a discord channel which is frequent by the `contributors <https://github.com/Torxed/archinstall_gui/graphs/contributors>`_.
+
+To join the server, head over to `discord.com/archinstall <https://discord.gg/cqXU88y>`_ and join in.
 There's not many rules other than common sense and treat others with respect.
 
 There's the `@Party Animals` role if you want notifications of new releases which is posted in the `#Release Party` channel.
