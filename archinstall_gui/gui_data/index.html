@@ -43,6 +43,24 @@
 				})
 			}
 
+			function sortSelect(selElem) {
+				var tmpAry = new Array();
+				for (var i=0;i<selElem.options.length;i++) {
+					tmpAry[i] = new Array();
+					tmpAry[i][0] = selElem.options[i].text;
+					tmpAry[i][1] = selElem.options[i].value;
+				}
+				tmpAry.sort();
+				while (selElem.options.length > 0) {
+					selElem.options[0] = null;
+				}
+				for (var i=0;i<tmpAry.length;i++) {
+					var op = new Option(tmpAry[i][0], tmpAry[i][1]);
+					selElem.options[i] = op;
+				}
+				return;
+			}
+
 			function listModules(data) {
 				console.log('Listing modules:', data)
 				let modules = document.querySelector('#modules');
@@ -124,6 +142,37 @@
 				}
 
 				return true;
+			}
+
+			function popup(information) {
+				let frame = document.createElement('div');
+				let frameContent = document.createElement('div');
+				frame.id = 'popup';
+				frame.classList = 'popup';
+				frameContent.classList = 'popupBody'
+
+				let header = document.createElement('div');
+				header.classList = 'noteHeader';
+				
+				let headerIcon = document.createElement('div');
+				headerIcon.classList = 'noteIcon';
+				let headerText = document.createElement('span');
+				headerText.innerHTML = 'Notification';
+
+				let content = document.createElement('div');
+				content.classList = 'noteBody';
+				content.innerHTML = information;
+
+				frame.appendChild(frameContent);
+				frameContent.appendChild(header);
+				header.appendChild(headerIcon);
+				header.appendChild(headerText);
+				frameContent.appendChild(content);
+
+				document.body.appendChild(frame);
+				frame.addEventListener('click', () => {
+					frame.remove();
+				})
 			}
 
 			function notification(data) {

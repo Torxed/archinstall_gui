@@ -27,30 +27,49 @@ if 'encryption' in session.steps:
 			</div>
 
 			<h3>Available mirrors</h3>
-			<select id="mirrorlist" multiple>
+			<select id="mirrorlist" class="flex-grow" multiple>
 
 			</select>
 
 			<h3>Add a custom mirror</h3>
-			<div class="form-area" id="form-area">
+			<div class="form-area">
 				<div class="input-form" id="input-form">
 					<input type="text" id="mirror_name" required autocomplete="off" />
 					<label class="label">
-						<span class="label-content">Name of mirror<i>(Ex: local_repo</i>.</span>
+						<span class="label-content">Name of the mirror <i>(For instance: local_repo)</i>.</span>
 					</label>
 				</div>
 			</div>
-			<div class="form-area" id="form-area">
+			<div class="form-area">
 				<div class="input-form" id="input-form">
 					<input type="text" id="mirror_url" required autocomplete="off" />
 					<label class="label">
-						<span class="label-content">URL to custom mirror <i>(Ex: http://192.168.0.1/$repo/os/$arch)</i>.</span>
+						<span class="label-content">URL to the custom mirror <i>(Ex: http://192.168.0.1/$repo/os/$arch)</i>.</span>
 					</label>
 				</div>
 			</div>
 
+			<div class="form-area oneliner">
+				<select id="custom_signcheck">
+					<option value="Never">Never</option>
+					<option value="Optional">Optional</option>
+					<option value="Required">Required</option>
+				</select>
+
+				<select id="custom_signoptions">
+					<option value="TrustedOnly">TrustedOnly (default)</option>
+					<option value="TrustAll">TrustAll</option>
+				</select>
+			</div>
+
+			<div class="form-area">
+				<div class="input-form" id="input-form">
+					<button id="save_custom_mirror" class="flex-grow">Add mirror to available mirrors</button>
+				</div>
+			</div>
+
 			<h3>Or use all mirrors from a specified region</h3>
-			<div class="form-area" id="form-area">
+			<div class="form-area">
 				<div class="input-form" id="input-form">
 					<input type="text" id="country_code" required autocomplete="off" />
 					<label class="label">
@@ -60,8 +79,8 @@ if 'encryption' in session.steps:
 			</div>
 
 			<div class="buttons bottom">
-				<button id="save_mirrors">Use selected mirrors</button>
-				<button id="user_automatic_detection">Use Automatic detection</button>
+				<button id="save_mirrors">Use selected mirrors <i>(and continue)</i></button>
+				<button id="user_automatic_detection">Auto-detect closest mirrors <i>(and continue)</i></button>
 				<button id="skip_step">Skip and use default mirrors</button>
 			</div>
 		</div>
@@ -72,33 +91,50 @@ else:
 ## TODO:
 ## Needs to be loaded this way, since we can't inject JS into divs etc in the HTML above.
 javascript = """
+document.querySelector('#save_mirrors').addEventListener('click', function() {
+	let mirror_list = document.querySelector('#mirrorlist');
+	
+	var options = mirror_list.options, count = 0;
+	for (var i=0; i < options.length; i++) {
+		if (options[i].selected) count++;
+	}
+
+	if (count == 0) {
+		popup('You need to select at least one mirror if you wish to use the selected mirrors option.');
+		return;
+	} else {
+		let mirrors = {};
+		Array.from(options).forEach(function(option_element) {
+			let option_text = option_element.text;
+			let option_value = option_element.value;
+			let is_option_selected = option_element.selected;
+
+			if (is_option_selected) {
+				mirrors[option_value] = option_element.getAttribute('country');
+			}
+		});
+
+		socket.send({
+			'_module' : 'installation_steps/mirrors',
+			'mirrors' : {
+				'region' : document.querySelector('#country_code').value,
+				'selected_mirrors' : mirrors
+			}
+		})
+	}
+})
+
+document.querySelector('#user_automatic_detection').addEventListener('click', function() {
+	socket.send({
+		'_module' : 'installation_steps/mirrors',
+		'mirrors' : 'autodetect'
+	})
+})
 
 document.querySelector('#skip_step').addEventListener('click', function() {
 	socket.send({
 		'_module' : 'installation_steps/mirrors',
 		'skip' : true
-	})
-})
-
-document.querySelector('#save_mirrors').addEventListener('click', function() {
-	let mirrors = {};
-	let mirror_list = document.querySelector('#mirrorlist');
-	Array.from(mirror_list.options).forEach(function(option_element) {
-		let option_text = option_element.text;
-		let option_value = option_element.value;
-		let is_option_selected = option_element.selected;
-
-		if (is_option_selected) {
-			mirrors[option_value] = option_element.getAttribute('country');
-		}
-	});
-
-	socket.send({
-		'_module' : 'installation_steps/mirrors',
-		'mirrors' : {
-			'region' : document.querySelector('#country_code').value,
-			'selected_mirrors' : mirrors
-		}
 	})
 })
 
@@ -118,6 +154,8 @@ window.refresh_mirrorlist = () => {
 
 		mirrorlist_dropdown.appendChild(option);
 	})
+
+	sortSelect(mirrorlist_dropdown);
 }
 
 window.update_mirrorlist = (data) => {
@@ -126,6 +164,26 @@ window.update_mirrorlist = (data) => {
 		window.refresh_mirrorlist();
 	}
 }
+
+save_custom_mirror.addEventListener('click', (event) => {
+	let dropdown = document.querySelector('#mirrorlist');
+
+	let mirror_name = document.querySelector('#mirror_name');
+	let mirror_url = document.querySelector('#mirror_url');
+	let custom_signcheck = document.querySelector('#custom_signcheck');
+	let custom_signoptions = document.querySelector('#custom_signoptions');
+	
+	let new_mirror = document.createElement('option');
+	new_mirror.value='-custom-';
+	new_mirror.setAttribute('name', mirror_name.value);
+	new_mirror.setAttribute('url', mirror_url.value);
+	new_mirror.setAttribute('signcheck', custom_signcheck.value);
+	new_mirror.setAttribute('signoptions', custom_signoptions.value);
+	new_mirror.innerHTML = `${mirror_name.value} (${mirror_url.value})`
+
+	dropdown.add(new_mirror, 0);
+	new_mirror.selected = true;
+})
 
 /* Sweden */
 //Server = https://mirror.osbeck.com/archlinux/$repo/os/$arch
@@ -152,6 +210,9 @@ def notify_mirror_updates(worker, *args, **kwargs):
 		'message' : 'Reorderings mirrors.',
 		'status' : 'active'
 	})
+
+def filter_by_region(frame, region, worker, *args, **kwargs):
+	return archinstall.filter_mirrors_by_region(region)
 
 def update_mirrorlist(frame, mirrors, worker, *args, **kwargs):
 	return archinstall.insert_mirrors(mirrors)
@@ -205,6 +266,22 @@ def on_request(frame):
 				'mirrorlist' : session.information['mirror_sync'],
 				'_modules' : 'mirrors'
 			}
+		elif frame.data['mirrors'] == 'autodetect':
+			with urllib.request.urlopen('https://slimhttp.hvornum.se/geoip') as url:
+				info = json.loads(url.read().decode())
+
+			session.steps['mirrors'] = spawn(frame, filter_by_region, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, region=info['country'])
+
+			yield {
+				'status' : 'queued',
+				'_modules' : 'arch_linux' 
+			}
+			yield {
+				'_modules' : 'mirrors',
+				'status' : 'complete',
+				'next' : 'language'
+			}
+			return
 		elif type(frame.data['mirrors']) == dict:
 			if ('selected_mirrors' not in frame.data['mirrors'] or 'region' not in frame.data['mirrors']) or len(frame.data['mirrors']['selected_mirrors']) == 0 and len(frame.data['mirrors']['region']) == 0:
 				yield {

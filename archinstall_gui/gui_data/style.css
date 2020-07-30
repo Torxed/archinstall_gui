@@ -577,83 +577,6 @@ body {
 		padding: 3px;
 	}
 
-	.popup {
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		background-color: #272822;
-		border: 1px solid #49483E;
-		display: flex;
-		min-height: 0;
-		flex-direction: column;
-		flex-grow: 1;
-		flex-shrink: 0;
-		flex-basis: 100%;
-	}
-		.popup > .title {
-			font-weight: bold;
-			font-size: 14px;
-			padding: 5px;
-			margin: 5px;
-			color: #66D9EF;
-			flex: 1;
-		}
-
-		.popup > .body {
-			padding: 5px;
-			margin: 5px;
-			color: #F8F8F2;
-			flex: 1;
-
-			display: flex;
-			flex-direction: column;
-		}
-
-			.popup > .body > * {
-				flex: 1;
-				display: flex;
-				flex-direction: column;
-			}
-
-		.popup > .buttons {
-			display: flex;
-			flex-direction: row;
-			border-top: 1px solid var(--blue);
-			padding: 4px;
-		}
-			.popup > .buttons > .Save {
-				flex: 1;
-				color: var(--complete);
-				border-right: 1px solid var(--blue);
-			}
-				.popup > .buttons > .Save:hover {
-					font-weight: bold;
-				}
-
-			.popup > .buttons > .OK {
-				flex: 1;
-				color: var(--complete);
-				border-right: 1px solid var(--blue);
-			}
-				.popup > .buttons > .OK:hover {
-					font-weight: bold;
-				}
-
-			.popup > .buttons > .Discard {
-				flex: 1;
-				color: var(--error);
-			}
-				.popup > .buttons > .Discard:hover {
-					font-weight: bold;
-				}
-			.popup > .buttons > .Cancel {
-				flex: 1;
-				color: var(--error);
-			}
-				.popup > .buttons > .Cancel:hover {
-					font-weight: bold;
-				}
-
 	.module_running {
 		background-image: url('/module_running.gif') !important;
 		background-size: 52px 52px !important;
@@ -719,9 +642,20 @@ body {
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	margin-top: auto;
-	margin-bottom: auto;
+	/*margin-top: auto;*/
+	/*margin-bottom: auto;*/
 	transition: all 0.3s ease;
+	padding: 10px;
+}
+
+.form-area.oneliner {
+	flex-direction: row !important;
+}
+.form-area.oneliner>* {
+	flex-grow: 1;
+}
+.flex-grow {
+	flex-grow: 1;
 }
 
 .input-form {
@@ -816,4 +750,25 @@ body {
 
 .flex.column {
 	flex-direction: column;
+}
+
+
+.popup {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-content: center;
+	align-items: center;
+
+	width: 100%;
+	height: 100%;
+	backdrop-filter: blur(10px) grayscale(0.5);
+}
+.popupBody {
+	background-color: #e7f2fa;
+	max-width: 60%;
+	border: 1px solid #333333;
 }
