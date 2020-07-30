@@ -300,7 +300,7 @@ def on_request(frame):
 				notification_done = notify_mirrors_complete
 				if 'mirrors' in session.information and len(session.information['mirrors']):
 					notification_done = None
-				region_update = spawn(frame, archinstall.filter_mirrors_by_region, start_callback=notify_mirror_updates, callback=notification_done, region=session.information['mirror_region'])
+				region_update = spawn(frame, filter_by_region, start_callback=notify_mirror_updates, callback=notification_done, region=session.information['mirror_region'])
 			
 			if 'mirrors' in session.information and len(session.information['mirrors']):
 				session.steps['mirrors'] = spawn(frame, update_mirrorlist, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, mirrors=session.information['mirrors'], dependency=region_update)
