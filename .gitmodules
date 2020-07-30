@@ -1,16 +1,18 @@
-[submodule "dependencies/archinstall"]
-	path = dependencies/archinstall
+[submodule "archinstall_gui/dependencies/archinstall"]
+	path = archinstall_gui/dependencies/archinstall
 	url = https://github.com/Torxed/archinstall.git
-[submodule "dependencies/slimHTTP"]
-	path = dependencies/slimHTTP
+[submodule "archinstall_gui/dependencies/slimHTTP"]
+	path = archinstall_gui/dependencies/slimHTTP
 	url = https://github.com/Torxed/slimHTTP.git
-[submodule "dependencies/slimWS"]
-	path = dependencies/slimWS
+[submodule "archinstall_gui/dependencies/slimWS"]
+	path = archinstall_gui/dependencies/slimWS
 	url = https://github.com/Torxed/slimWS.git
-[submodule "web_content/slimWebSocket"]
-	path = gui_data/slimWebSocket
+[submodule "archinstall_gui/dependencies/slimWebSocket"]
+	path = archinstall_gui/dependencies/slimWebSocket
 	url = https://github.com/Torxed/slimWebSocket.git
 [dependencies "slimHTTP"]
+	master = master
+[dependencies "slimWS"]
 	master = master
 [dependencies "archinstall"]
 	master = master
