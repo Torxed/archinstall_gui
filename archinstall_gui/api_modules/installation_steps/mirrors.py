@@ -103,14 +103,19 @@ document.querySelector('#save_mirrors').addEventListener('click', function() {
 		popup('You need to select at least one mirror if you wish to use the selected mirrors option.');
 		return;
 	} else {
-		let mirrors = {};
+		let mirrors = [];
 		Array.from(options).forEach(function(option_element) {
 			let option_text = option_element.text;
 			let option_value = option_element.value;
 			let is_option_selected = option_element.selected;
 
 			if (is_option_selected) {
-				mirrors[option_value] = option_element.getAttribute('country');
+				mirrors.push({'value' : option_value, 
+							'country' : option_element.getAttribute('country'),
+							'url' : option_element.getAttribute('url'),
+							'signcheck' : option_element.getAttribute('signcheck'),
+							'signoptions' : option_element.getAttribute('signoptions'),
+							'name' : option_element.getAttribute('name')});
 			}
 		});
 
@@ -215,7 +220,16 @@ def filter_by_region(frame, region, worker, *args, **kwargs):
 	return archinstall.filter_mirrors_by_region(region)
 
 def update_mirrorlist(frame, mirrors, worker, *args, **kwargs):
-	return archinstall.insert_mirrors(mirrors)
+	custom_mirrors = []
+	normal_mirrors = {}
+	for mirror in mirrors:
+		if mirror['value'] == '-custom-':
+			custom_mirrors.append(mirror)
+		else:
+			normal_mirrors[mirror['value']] = mirror['country']
+
+	archinstall.add_custom_mirrors(custom_mirrors)
+	return archinstall.insert_mirrors(normal_mirrors)
 
 def stub(*args, **kwargs):
 	return True
@@ -301,6 +315,8 @@ def on_request(frame):
 				if 'mirrors' in session.information and len(session.information['mirrors']):
 					notification_done = None
 				region_update = spawn(frame, filter_by_region, start_callback=notify_mirror_updates, callback=notification_done, region=session.information['mirror_region'])
+
+			custom_mirrors = spawn(frame, stub)
 			
 			if 'mirrors' in session.information and len(session.information['mirrors']):
 				session.steps['mirrors'] = spawn(frame, update_mirrorlist, start_callback=notify_mirror_updates, callback=notify_mirrors_complete, mirrors=session.information['mirrors'], dependency=region_update)
