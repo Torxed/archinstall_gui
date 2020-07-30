@@ -6,6 +6,7 @@
 		<script type="text/javascript" src="./slimWebSocket/slimWebSocket.js"></script>
 		<title>Archinstall GUI</title>
 		<script type="text/javascript">
+			let startpage = 'arch_linux';
 			let socket = new slimWebSocket('ws://127.0.0.1');
 			var xhr = null;
 
@@ -76,9 +77,7 @@
 				modules.appendChild(entries);
 
 				if(!initiated) {
-					socket.send({
-						'_module' : 'installation_steps/'+Object.keys(data['modules'])[0]
-					})
+					socket.send({'_module' : 'installation_steps/'+startpage})
 					initiated = true;
 				}
 			}
