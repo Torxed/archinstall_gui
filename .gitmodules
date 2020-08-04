@@ -11,3 +11,7 @@
 	master = master
 [dependencies "slimWS"]
 	master = master
+[submodule "archinstall_gui/dependencies/archinstall"]
+	path = archinstall_gui/dependencies/archinstall
+	url = https://github.com/Torxed/archinstall.git
+	branch = master
