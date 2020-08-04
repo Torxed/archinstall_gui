@@ -98,10 +98,11 @@ def stub(*args, **kwargs):
 	return True
 
 def on_request(frame):
-	print(frame.data)
+	main_dependency = 'ntp'
+	
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/profiles':
 		if 'skip' in frame.data:
-			session.steps['profiles'] = spawn(frame, stub, dependency='language')
+			session.steps['profiles'] = spawn(frame, stub, dependency=main_dependency)
 			yield {
 				'_modules' : 'profiles',
 				'status' : 'skipped',
@@ -129,7 +130,7 @@ def on_request(frame):
 		
 		elif 'template' in frame.data and frame.data['template'].strip():
 			
-			session.steps['profiles'] = spawn(frame, install_profile, profile_name=frame.data['template'], start_callback=notify_template_started, callback=notify_template_installed, dependency='language')
+			session.steps['profiles'] = spawn(frame, install_profile, profile_name=frame.data['template'], start_callback=notify_template_started, callback=notify_template_installed, dependency=main_dependency)
 			
 			yield {
 				'status' : 'queued',
