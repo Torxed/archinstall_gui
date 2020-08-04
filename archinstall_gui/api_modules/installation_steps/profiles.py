@@ -115,13 +115,7 @@ def on_request(frame):
 				## https://github.com/Torxed/archinstall/tree/master/deployments
 				## document.querySelectorAll('.js-navigation-open') -> item.title
 				
-				session.information['profiles_cache'] = {}
-				for root, folders, files in os.walk('./dependencies/archinstall/profiles/'):
-					for file in files:
-						extension = os.path.splitext(file)[1]
-						if extension in ('.json', '.py'):
-							session.information['profiles_cache'][file] = os.path.join(root, file)
-					break
+				session.information['profiles_cache'] = archinstall.list_profiles('./dependencies/archinstall/profiles/')
 
 				yield {
 					'status' : 'success',
