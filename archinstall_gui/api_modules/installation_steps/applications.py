@@ -38,6 +38,8 @@ html = """
 javascript = """
 
 document.querySelector('#install_packages').addEventListener('click', function() {
+	reboot_step = 'applications';
+
 	socket.send({
 		'_module' : 'installation_steps/applications',
 		'applications' : document.querySelector('#package_list').value

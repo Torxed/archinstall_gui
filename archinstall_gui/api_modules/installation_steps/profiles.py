@@ -33,6 +33,8 @@ html = """
 javascript = """
 
 document.querySelector('#save_templates').addEventListener('click', function() {
+	reboot_step = 'profiles';
+
 	socket.send({
 		'_module' : 'installation_steps/profiles',
 		'template' : document.querySelector('#templatelist').value
@@ -74,7 +76,6 @@ socket.send({'_module' : 'installation_steps/profiles', 'templates' : 'refresh'}
 
 """
 
-
 def notify_template_started(worker, *args, **kwargs):
 	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
@@ -92,7 +93,7 @@ def notify_template_installed(worker, *args, **kwargs):
 	})
 
 def install_profile(frame, profile_name, worker, hostname='Archnistall', *args, **kwargs):
-	return session.steps['arch_linux'].install_profile(session.information['profiles_cache'][profile_name])
+	return session.steps['arch_linux'].install_profile(session.information['profiles_cache'][profile_name]['path'])
 
 def stub(*args, **kwargs):
 	return True

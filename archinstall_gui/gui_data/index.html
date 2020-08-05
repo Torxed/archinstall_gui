@@ -7,6 +7,8 @@
 		<title>Archinstall GUI</title>
 		<script type="text/javascript">
 			let startpage = 'arch_linux';
+			let reboot_step = 'arch_linux'; //# This changes depending on what buttons you press "save" on.
+
 			let socket = new slimWebSocket('ws://127.0.0.1');
 			var xhr = null;
 
@@ -193,6 +195,17 @@
 					} else {
 						activity.innerHTML = '';
 					}
+
+					if (['complete', 'success', 'done'].includes(data['status']) && data['source'] == reboot_step) {
+						notification({
+							'type' : 'notification',
+							'source' : 'arch_linux',
+							'message' : '<div class="balloon">Installation complete, click here to <b class="reboot" onClick="reboot();">reboot</b> when you\'re done</div>',
+							'sticky' : true,
+							'status' : 'complete'
+						})
+						popup('<div class="balloon">Installation complete, click here to <b class="reboot" onClick="reboot();">reboot</b> when you\'re done</div>')
+					}
 				}
 
 				if(typeof data['message'] !== 'undefined')
@@ -201,6 +214,7 @@
 				if(typeof data['next'] !== 'undefined')
 					socket.send({'_module' : 'installation_steps/'+data['next']});
 
+				/*
 				if(typeof data['sticky'] !== 'undefined') {
 					sticky_notification = data;
 				} else {
@@ -224,6 +238,7 @@
 						}, 1000)
 					}
 				}
+				*/
 
 				return true;
 			}

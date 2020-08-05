@@ -55,7 +55,7 @@ html = """
 
 	<div class="buttons bottom">
 		<button id="save_language">Save settings</button>
-		<button id="skip_step">Skip and don't set a timezone</button>
+		<button id="skip_step">Skip and only set locale</button>
 	</div>
 </div>
 """
@@ -143,6 +143,8 @@ window.update_timezones = (data) => {
 }
 
 document.querySelector('#save_language').addEventListener('click', function() {
+	reboot_step = 'language';
+
 	let tz = document.querySelector("#timezone");
 	let loc = document.querySelector('#locale');
 
@@ -155,6 +157,8 @@ document.querySelector('#save_language').addEventListener('click', function() {
 })
 
 document.querySelector('#skip_step').addEventListener('click', function() {
+	reboot_step = 'language';
+	
 	socket.send({
 		'_module' : 'installation_steps/language',
 		'skip' : true
@@ -207,7 +211,16 @@ def stub(*args, **kwargs):
 def on_request(frame):
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/language':
 		if 'skip' in frame.data:
-			session.steps['language'] = spawn(frame, set_locale, fmt='en_US', start_callback=language_config_start, dependency='arch_linux_worker')
+			# A bit of a missnomer, but ntp is the expected last step
+			# of the language section, so set_locale has to satisfy it if we're skipping the step.
+			session.steps['ntp'] = spawn(frame, set_locale, fmt='en_US', start_callback=language_config_start, callback=notify_language_set, dependency='arch_linux_worker')
+
+			yield {
+				'_modules' : 'language',
+				'status' : 'queued',
+				'next' : 'profiles'
+			}
+			return
 
 		elif not 'locale' in frame.data and not 'timezone' in frame.data:
 			yield {

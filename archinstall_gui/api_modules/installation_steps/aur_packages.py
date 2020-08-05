@@ -66,6 +66,8 @@ html = """
 javascript = """
 
 document.querySelector('#activate_AUR').addEventListener('click', function() {
+	// reboot_step = 'aur_packages'; // not sure this is ever run
+
 	document.querySelector('#package_list').disabled = false;
 	document.querySelector('#lbl_content').innerHTML = "Space separated list of AUR packages to install.";
 	socket.send({
@@ -75,6 +77,8 @@ document.querySelector('#activate_AUR').addEventListener('click', function() {
 })
 
 document.querySelector('#install_packages').addEventListener('click', function() {
+	reboot_step = 'aur_packages';
+
 	socket.send({
 		'_module' : 'installation_steps/aur_packages',
 		'packages' : document.querySelector('#package_list').value.split(" ")
@@ -105,7 +109,7 @@ def install_packages(frame, packages, worker, *args, **kwargs):
 def notify_AUR_being_added(worker, *args, **kwargs):
 	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
-		'source' : 'aur_packages',
+		'source' : 'aur_support',
 		'message' : f"Enabling AUR support by installing <div class=\"inlineCode\">yay</div> ",
 		'status' : 'active'
 	})
@@ -113,7 +117,7 @@ def notify_AUR_being_added(worker, *args, **kwargs):
 def notify_aur_added(worker, *args, **kwargs):
 	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
-		'source' : 'aur_packages',
+		'source' : 'aur_support',
 		'message' : f"<div class=\"inlineCode\">yay</div> has been installed",
 		'status' : 'complete'
 	})
