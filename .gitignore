@@ -2,4 +2,8 @@
 **/**SAFETY_LOCK
 **/**update_dependencies.sh
 **/**_build
+**/**.pkg.*xz
+**/**.tar.gz
+**/**pkg
+**/**src
 tmp
