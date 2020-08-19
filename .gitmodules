@@ -1,6 +1,3 @@
-[submodule "archinstall_gui/dependencies/archinstall"]
-	path = archinstall_gui/dependencies/archinstall
-	url = https://github.com/Torxed/archinstall.git
 [submodule "archinstall_gui/dependencies/slimHTTP"]
 	path = archinstall_gui/dependencies/slimHTTP
 	url = https://github.com/Torxed/slimHTTP.git
@@ -14,5 +11,7 @@
 	master = master
 [dependencies "slimWS"]
 	master = master
-[dependencies "archinstall"]
-	master = master
+[submodule "archinstall_gui/dependencies/archinstall"]
+	path = archinstall_gui/dependencies/archinstall
+	url = https://github.com/Torxed/archinstall.git
+	branch = master

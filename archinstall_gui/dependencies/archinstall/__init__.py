@@ -1,1 +1,0 @@
-from .archinstall import *

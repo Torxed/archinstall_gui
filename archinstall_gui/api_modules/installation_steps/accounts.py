@@ -59,6 +59,8 @@ html = """
 javascript = """
 
 document.querySelector('#create_user').addEventListener('click', function() {
+	reboot_step = 'accounts';
+
 	socket.send({
 		'_module' : 'installation_steps/accounts',
 		'username' : document.querySelector('#user').value,

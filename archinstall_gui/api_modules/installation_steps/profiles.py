@@ -33,6 +33,8 @@ html = """
 javascript = """
 
 document.querySelector('#save_templates').addEventListener('click', function() {
+	reboot_step = 'profiles';
+
 	socket.send({
 		'_module' : 'installation_steps/profiles',
 		'template' : document.querySelector('#templatelist').value
@@ -74,7 +76,6 @@ socket.send({'_module' : 'installation_steps/profiles', 'templates' : 'refresh'}
 
 """
 
-
 def notify_template_started(worker, *args, **kwargs):
 	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
@@ -92,16 +93,17 @@ def notify_template_installed(worker, *args, **kwargs):
 	})
 
 def install_profile(frame, profile_name, worker, hostname='Archnistall', *args, **kwargs):
-	return session.steps['arch_linux'].install_profile(session.information['profiles_cache'][profile_name])
+	return session.steps['arch_linux'].install_profile(session.information['profiles_cache'][profile_name]['path'])
 
 def stub(*args, **kwargs):
 	return True
 
 def on_request(frame):
-	print(frame.data)
+	main_dependency = 'ntp'
+	
 	if '_module' in frame.data and frame.data['_module'] == 'installation_steps/profiles':
 		if 'skip' in frame.data:
-			session.steps['profiles'] = spawn(frame, stub, dependency='language')
+			session.steps['profiles'] = spawn(frame, stub, dependency=main_dependency)
 			yield {
 				'_modules' : 'profiles',
 				'status' : 'skipped',
@@ -114,13 +116,7 @@ def on_request(frame):
 				## https://github.com/Torxed/archinstall/tree/master/deployments
 				## document.querySelectorAll('.js-navigation-open') -> item.title
 				
-				session.information['profiles_cache'] = {}
-				for root, folders, files in os.walk('./dependencies/archinstall/profiles/'):
-					for file in files:
-						extension = os.path.splitext(file)[1]
-						if extension in ('.json', '.py'):
-							session.information['profiles_cache'][file] = os.path.join(root, file)
-					break
+				session.information['profiles_cache'] = archinstall.list_profiles('./dependencies/archinstall/profiles/')
 
 				yield {
 					'status' : 'success',
@@ -129,7 +125,7 @@ def on_request(frame):
 		
 		elif 'template' in frame.data and frame.data['template'].strip():
 			
-			session.steps['profiles'] = spawn(frame, install_profile, profile_name=frame.data['template'], start_callback=notify_template_started, callback=notify_template_installed, dependency='language')
+			session.steps['profiles'] = spawn(frame, install_profile, profile_name=frame.data['template'], start_callback=notify_template_started, callback=notify_template_installed, dependency=main_dependency)
 			
 			yield {
 				'status' : 'queued',
