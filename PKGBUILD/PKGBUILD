@@ -11,7 +11,8 @@ provides=("${pkgname}")
 md5sums=('SKIP')
 arch=('x86_64')
 source=("${pkgname}-v${pkgver}-x86_64.tar.gz::https://github.com/Torxed/archinstall_gui/archive/v$pkgver.tar.gz")
-depends=('python>=3.8' 'chromium' 'xorg-server' 'xorg-xinit' 'archinstall')
+#depends=('python>=3.8' 'chromium' 'xorg-server' 'xorg-xinit' 'archinstall')
+depends=('python>=3.8' 'chromium' 'xorg-server' 'xorg-xinit')
 optdepends=('python-systemd: Adds more controlled logging functionality')
 
 package() {
@@ -29,7 +30,8 @@ package() {
 	# introducing optdepends for python>=3.8 which will build and install the library.
 	# After that, we can completely remove the submodule-requirement for archinstall in archinstall_gui.
 	# But until then, we'll have to manually clone it in in the wait for a dual-build release of archinstall PKGBUILD.
-	git clone -b master "${archinstall_url}" archinstall_gui/dependencies/archinstall
+	rm -rf archinstall_gui/dependencies/archinstall
+	git clone "${archinstall_url}" archinstall_gui/dependencies/archinstall
 
 	mv archinstall_gui/* "${pkgdir}/srv/archinstall_gui/"
 	mv PKGBUILD/archinstall-gui "${pkgdir}/usr/bin/archinstall-gui"
