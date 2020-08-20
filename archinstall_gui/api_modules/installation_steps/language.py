@@ -213,7 +213,7 @@ def on_request(frame):
 		if 'skip' in frame.data:
 			# A bit of a missnomer, but ntp is the expected last step
 			# of the language section, so set_locale has to satisfy it if we're skipping the step.
-			session.steps['ntp'] = spawn(frame, set_locale, fmt='en_US', start_callback=language_config_start, callback=notify_language_set, dependency='arch_linux_worker')
+			session.steps['ntp'] = spawn(frame, set_locale, fmt='en_US', start_callback=language_config_start, callback=notify_language_set, dependency='accounts')
 
 			yield {
 				'_modules' : 'language',
