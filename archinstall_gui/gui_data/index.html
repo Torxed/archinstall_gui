@@ -7,7 +7,7 @@
 		<title>Archinstall GUI</title>
 		<script type="text/javascript">
 			let startpage = 'arch_linux';
-			let reboot_step = 'arch_linux'; //# This changes depending on what buttons you press "save" on.
+			let reboot_step = 'accounts'; //# This changes depending on what buttons you press "save" on.
 
 			let socket = new slimWebSocket('ws://127.0.0.1');
 			var xhr = null;
@@ -41,7 +41,7 @@
 
 			function reboot() {
 				socket.send({
-					'_module' : 'reboot'
+					'_modules' : 'reboot'
 				})
 			}
 
@@ -163,7 +163,10 @@
 
 				let content = document.createElement('div');
 				content.classList = 'noteBody';
-				content.innerHTML = information;
+				if (typeof information == "string")
+					content.innerHTML = information;
+				else
+					content.appendChild(information)
 
 				frame.appendChild(frameContent);
 				frameContent.appendChild(header);
@@ -172,9 +175,12 @@
 				frameContent.appendChild(content);
 
 				document.body.appendChild(frame);
-				frame.addEventListener('click', () => {
-					frame.remove();
+				frame.addEventListener('click', (event) => {
+					if(event.target == frame) // event.path[0]?
+						frame.remove();
 				})
+
+				return frame;
 			}
 
 			function notification(data) {

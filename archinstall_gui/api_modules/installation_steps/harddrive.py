@@ -104,8 +104,7 @@ def notify_base_install_done(worker, *args, **kwargs):
 	worker.frame.CLIENT_IDENTITY.send({
 		'type' : 'notification',
 		'source' : 'arch_linux',
-		'message' : '<div class="balloon">Installation complete, click here to <b class="reboot" onClick="reboot();">reboot</b> when you\'re done</div>',
-		'sticky' : True,
+		'message' : '<div class="balloon">Base installation complete.</div>',
 		'status' : 'complete'
 	})
 

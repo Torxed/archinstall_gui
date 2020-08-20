@@ -255,7 +255,7 @@ def on_request(frame):
 			yield {
 				'_modules' : 'mirrors',
 				'status' : 'complete',
-				'next' : 'language'
+				'next' : 'accounts'
 			}
 			return
 
@@ -293,7 +293,7 @@ def on_request(frame):
 			yield {
 				'_modules' : 'mirrors',
 				'status' : 'complete',
-				'next' : 'language'
+				'next' : 'accounts'
 			}
 			return
 		elif type(frame.data['mirrors']) == dict:
@@ -328,6 +328,6 @@ def on_request(frame):
 			
 			yield {
 				'status' : 'success',
-				'next' : 'language', # skip arch_linux as it's an informational page, will be redirected after the last AUR step.
+				'next' : 'accounts', # skip arch_linux as it's an informational page, will be redirected after the last AUR step.
 				'_modules' : 'mirrors' 
 			}

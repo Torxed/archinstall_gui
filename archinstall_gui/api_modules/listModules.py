@@ -10,10 +10,10 @@ def on_request(frame):
 				'Encryption' : {'required' : True, 'defaults' : {}},
 				'Mirrors' : {'required' : True, 'defaults' : {}},
 				'Arch Linux' : {'required' : False, 'defaults' : {}},
+				'Accounts' : {'required' : False, 'defaults' : {}},
 				'Language' : {'required' : False, 'defaults' : {}},
 				'Profiles' : {'required' : False, 'defaults' : {}},
 				'Applications' : {'required' : False, 'defaults' : {}},
-				'Accounts' : {'required' : False, 'defaults' : {}},
 				'AUR Packages' : {'required' : False, 'defaults' : {}},
 			}),
 			'_modules' : 'listModules'

@@ -37,13 +37,14 @@ html = """
 		<li>AUR package support</li>
 	</ul>
 
+	<!--
 	<div class="note">
 		<div class="noteHeader"><div class="noteIcon"></div><span>Note</span></div>
 		<div class="noteBody">
 			The installer will not provide or set a <div class="inlineCode">root</div> password, after a successful boot, <a target="_blank" href="https://wiki.archlinux.org/index.php/installation_guide#Root_password">root password</a> must be set manually.
 		</div>
 	</div>
-
+	-->
 </div>
 """
 

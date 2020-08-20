@@ -84,7 +84,7 @@ def on_request(frame):
 			yield {
 				'_modules' : 'applications',
 				'status' : 'skipped',
-				'next' : 'accounts'
+				'next' : 'aur_packages'
 			}
 			return
 		elif not 'applications' in frame.data:
@@ -99,5 +99,5 @@ def on_request(frame):
 			yield {
 				'status' : 'queued',
 				'_modules' : 'applications',
-				'next' : 'accounts'
+				'next' : 'aur_packages'
 			}

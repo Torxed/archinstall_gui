@@ -257,7 +257,7 @@ def on_request(frame):
 		else:
 			# TODO: Perhaps just change the language if the process hasn't yet finished.
 			if not 'locale' in session.steps:
-				session.steps['locale'] = spawn(frame, set_locale, fmt=frame.data['locale'], start_callback=language_config_start, dependency='arch_linux_worker')
+				session.steps['locale'] = spawn(frame, set_locale, fmt=frame.data['locale'], start_callback=language_config_start, dependency='accounts')
 				session.steps['language'] = spawn(frame, set_timezone, tz=frame.data['timezone'], dependency=session.steps['locale'])
 				
 				if frame.data['ntp']:
