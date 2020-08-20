@@ -6,4 +6,5 @@
 **/**.tar.gz
 **/**pkg
 **/**src
+archinstall_gui/dependencies/archinstall
 tmp
