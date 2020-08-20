@@ -1,7 +1,7 @@
 # Maintainer: Anton Hvornum anton@hvornum.se
 # Contributor: Anton Hvornum anton@hvornum.se
 pkgname="archinstall-gui"
-pkgver="0.1rc17"
+pkgver="0.1rc18"
 pkgdesc="A graphical installer for Arch Linux. Useful for Live CD's etc."
 pkgrel=1
 url="https://github.com/Torxed/archinstall_gui"
